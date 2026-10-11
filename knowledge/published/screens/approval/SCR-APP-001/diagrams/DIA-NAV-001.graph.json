@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_id": "DIA-NAV-001",
+  "type": "screen-navigation",
+  "title": "Điều hướng màn hình",
+  "summary": "Từ danh sách Requests, chọn một yêu cầu để mở SCR-APP-001. Người dùng cần quyền xem và đúng data scope.",
+  "nodes": [
+    {
+      "id": "list",
+      "type": "screen",
+      "label": "Danh sách Requests",
+      "position": {
+        "x": 90,
+        "y": 120
+      },
+      "rule_ids": [],
+      "description": ""
+    },
+    {
+      "id": "detail",
+      "type": "screen",
+      "label": "Chi tiết yêu cầu",
+      "position": {
+        "x": 400,
+        "y": 120
+      },
+      "screen_id": "SCR-APP-001",
+      "rule_ids": [],
+      "description": ""
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "list",
+      "target": "detail",
+      "label": "Chọn request"
+    }
+  ]
+}

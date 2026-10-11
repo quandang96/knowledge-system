@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "diagram_id": "DIA-APP-001",
+  "type": "business-flow",
+  "title": "Luồng phê duyệt yêu cầu",
+  "summary": "ROLE-MANAGER nhận yêu cầu Pending, kiểm tra BR-014 tại SCR-APP-001. Đúng phạm vi: FUNC-APP-003 chuyển Approved; không hợp lệ: từ chối và ghi lý do.",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "label": "Nhận yêu cầu",
+      "position": {
+        "x": 40,
+        "y": 160
+      },
+      "rule_ids": [],
+      "description": ""
+    },
+    {
+      "id": "review",
+      "type": "decision",
+      "label": "Kiểm tra phạm vi",
+      "position": {
+        "x": 300,
+        "y": 160
+      },
+      "role_id": "ROLE-MANAGER",
+      "rule_ids": [
+        "BR-014"
+      ],
+      "description": ""
+    },
+    {
+      "id": "approve",
+      "type": "end",
+      "label": "Phê duyệt",
+      "position": {
+        "x": 570,
+        "y": 65
+      },
+      "function_id": "FUNC-APP-003",
+      "rule_ids": [],
+      "description": ""
+    },
+    {
+      "id": "reject",
+      "type": "end",
+      "label": "Từ chối",
+      "position": {
+        "x": 570,
+        "y": 255
+      },
+      "rule_ids": [],
+      "description": ""
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "start",
+      "target": "review",
+      "label": "Pending"
+    },
+    {
+      "id": "e2",
+      "source": "review",
+      "target": "approve",
+      "label": "Hợp lệ"
+    },
+    {
+      "id": "e3",
+      "source": "review",
+      "target": "reject",
+      "label": "Không hợp lệ"
+    }
+  ]
+}

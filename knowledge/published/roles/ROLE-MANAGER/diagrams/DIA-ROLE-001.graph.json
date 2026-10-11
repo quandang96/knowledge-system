@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_id": "DIA-ROLE-001",
+  "type": "role-hierarchy",
+  "title": "Phạm vi trách nhiệm Manager",
+  "summary": "ROLE-MANAGER phụ trách yêu cầu phòng ban được gán. Quan hệ trách nhiệm không đồng nghĩa với kế thừa quyền tự động.",
+  "nodes": [
+    {
+      "id": "manager",
+      "type": "role",
+      "label": "Quản lý phòng ban",
+      "position": {
+        "x": 90,
+        "y": 120
+      },
+      "role_id": "ROLE-MANAGER",
+      "rule_ids": [],
+      "description": ""
+    },
+    {
+      "id": "scope",
+      "type": "system",
+      "label": "Phòng ban được gán",
+      "position": {
+        "x": 400,
+        "y": 120
+      },
+      "rule_ids": [],
+      "description": ""
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "manager",
+      "target": "scope",
+      "label": "Phạm vi dữ liệu"
+    }
+  ]
+}
