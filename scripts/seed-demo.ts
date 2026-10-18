@@ -20,7 +20,7 @@ Atlas kết nối quy trình, màn hình, chức năng, quyền và kiểm thử
 
 1. Đọc [Quy trình phê duyệt](/business-flows/approval/BF-APP-001/).
 2. Khám phá [Màn hình chi tiết yêu cầu](/screens/approval/SCR-APP-001/).
-3. Đối chiếu [Quy tắc BR-014](/business-rules/approval/BR-014/) và [Kịch bản kiểm thử](/test-scenarios/approval/TC-APP-001/).
+3. Đối chiếu [Quy tắc BR-014](/business-rules/approval/BR-014/).
 
 ## Quy trình biên tập
 
@@ -50,7 +50,7 @@ Module minh họa việc tiếp nhận, xem xét và phê duyệt yêu cầu c�
 ## Trạng thái
 
 Pending → Approved hoặc Rejected. Yêu cầu đã có quyết định không được xử lý lại.` },
-  { id: 'BF-APP-001', type: 'business-flow', title: 'Quy trình phê duyệt yêu cầu', summary: 'Từ yêu cầu mới đến quyết định phê duyệt, với điều kiện và ngoại lệ rõ ràng.', related: ['SCR-APP-001','ROLE-MANAGER','BR-014','TC-APP-001'], body: `# Quy trình phê duyệt yêu cầu
+  { id: 'BF-APP-001', type: 'business-flow', title: 'Quy trình phê duyệt yêu cầu', summary: 'Từ yêu cầu mới đến quyết định phê duyệt, với điều kiện và ngoại lệ rõ ràng.', related: ['SCR-APP-001','ROLE-MANAGER','BR-014'], body: `# Quy trình phê duyệt yêu cầu
 
 ## Mục tiêu nghiệp vụ
 
@@ -77,7 +77,7 @@ Tác nhân: ROLE-MANAGER. Trigger: yêu cầu chờ xử lý. Người quản l�
 
 - Yêu cầu đã được xử lý ở tab khác: tải lại trạng thái mới.
 - Ngoài phạm vi phòng ban: không cho phép phê duyệt.` },
-  { id: 'SCR-APP-001', type: 'screen', title: 'Chi tiết yêu cầu phê duyệt', summary: 'Thông tin yêu cầu, trạng thái, lịch sử và các thao tác của người phê duyệt.', related: ['BF-APP-001','FUNC-APP-003','ROLE-MANAGER','PERM-APP-001','BR-014','TC-APP-001'], body: `# Chi tiết yêu cầu phê duyệt
+  { id: 'SCR-APP-001', type: 'screen', title: 'Chi tiết yêu cầu phê duyệt', summary: 'Thông tin yêu cầu, trạng thái, lịch sử và các thao tác của người phê duyệt.', related: ['BF-APP-001','FUNC-APP-003','ROLE-MANAGER','PERM-APP-001','BR-014'], body: `# Chi tiết yêu cầu phê duyệt
 
 ## Mục đích
 
@@ -113,11 +113,8 @@ ROLE-MANAGER được xem yêu cầu trong phòng ban được gán. Quyền ph�
 ## Ngoại lệ
 
 API phải kiểm tra quyền lại khi thực hiện thao tác, kể cả khi nút đang hiển thị. Xung đột trạng thái trả lỗi để người dùng tải lại.
-
-## Kiểm thử liên quan
-
-Đọc [TC-APP-001](/test-scenarios/approval/TC-APP-001/) để kiểm tra case positive, negative và boundary.` },
-  { id: 'FUNC-APP-003', type: 'function', title: 'Phê duyệt yêu cầu', summary: 'Trigger, input/output, validation và xử lý lỗi cho thao tác Approve.', related: ['SCR-APP-001','ROLE-MANAGER','BR-014','TC-APP-001'], body: `# Phê duyệt yêu cầu
+` },
+  { id: 'FUNC-APP-003', type: 'function', title: 'Phê duyệt yêu cầu', summary: 'Trigger, input/output, validation và xử lý lỗi cho thao tác Approve.', related: ['SCR-APP-001','ROLE-MANAGER','BR-014'], body: `# Phê duyệt yêu cầu
 
 ## Mục đích và trigger
 
@@ -178,7 +175,7 @@ Approve chỉ khi Pending và thỏa BR-014. Tất cả kiểm tra thực hiện
 ## Phiên bản và nguồn
 
 Phiên bản minh họa 1.0.0. Đây là business permissions, không phải quyền biên tập Atlas.` },
-  { id: 'BR-014', type: 'business-rule', title: 'Giới hạn phạm vi phê duyệt', summary: 'Quản lý chỉ phê duyệt yêu cầu trong phòng ban được gán, tại trạng thái Pending.', related: ['ROLE-MANAGER','FUNC-APP-003','TC-APP-001'], body: `# Giới hạn phạm vi phê duyệt
+  { id: 'BR-014', type: 'business-rule', title: 'Giới hạn phạm vi phê duyệt', summary: 'Quản lý chỉ phê duyệt yêu cầu trong phòng ban được gán, tại trạng thái Pending.', related: ['ROLE-MANAGER','FUNC-APP-003'], body: `# Giới hạn phạm vi phê duyệt
 
 ## Nội dung quy tắc
 
@@ -201,24 +198,6 @@ Không có bypass trong demo. Nếu không đủ điều kiện thì từ chối
 ## Hiệu lực và nguồn
 
 Tài liệu minh họa 1.0.0. Cần BA xác nhận lại trước khi dùng trong business thật.` },
-  { id: 'TC-APP-001', type: 'test-scenario', title: 'Kiểm thử quyền phê duyệt', summary: 'Các trường hợp đúng quyền, ngoài phạm vi và xung đột trạng thái cho module Approval.', related: ['BR-014','FUNC-APP-003','SCR-APP-001'], body: `# Kiểm thử quyền phê duyệt
-
-## Điều kiện tiên quyết
-
-Dữ liệu demo có request Pending ở phòng A và phòng B. Tài khoản minh họa ROLE-MANAGER được gán phòng A.
-
-## Các bước và kết quả
-
-| Case | Bước kiểm thử | Kết quả mong đợi |
-| --- | --- | --- |
-| Positive | Mở request phòng A, chọn Approve | Chuyển Approved và ghi lịch sử |
-| Negative | Gọi API approve request phòng B | Từ chối do ngoài scope |
-| Boundary | Hai tab approve cùng request | Chỉ một quyết định thành công; tab cũ nhận conflict |
-| Negative | Approve request đã Rejected | Từ chối do không Pending |
-
-## Truy vết
-
-Nguồn: BR-014, FUNC-APP-003 và SCR-APP-001. Các case này chỉ là dữ liệu business minh họa.` },
   { id: 'REF-DEMO-001', type: 'reference', title: 'Quy ước viết tài liệu', summary: 'ID ổn định, source links, ngôn ngữ và cách quản lý cập nhật tài liệu.', related: ['OV-DEMO-001'], body: `# Quy ước viết tài liệu
 
 ## Định danh
@@ -234,7 +213,7 @@ Ghi rõ nguồn xác nhận trong source links. Dùng language vi, ja hoặc en.
 Lưu Draft trước, kiểm tra ảnh và liên kết, rồi Publisher xuất bản. Git revision dùng để đối chiếu và khôi phục.` }
 ]
 for (const doc of all) {
-  const metadata = metadataSchema.parse({ doc_id: doc.id, project_id: 'demo-project', type: doc.type, module: 'approval', title: doc.title, language: 'vi', status: 'published', classification: 'internal', owner: 'BA Demo Team', version: '1.0.0', updated_at: '2026-10-11T09:00:00+07:00', related_ids: doc.related, tags: ['demo','approval'], summary: doc.summary, ...(doc.type === 'screen' ? { screen: { route: '/requests/:id', menu_path: ['Home','Requests','Request Detail'], screenshot: { cover: './assets/main-screen-demo.png', gallery: [{ path: './assets/main-screen-demo.png', alt: 'Màn hình chi tiết yêu cầu minh họa', caption: 'Overview · Giao diện giả định cho project demo', category: 'overview' }, { path: './assets/approve-modal-demo.webp', alt: 'Hộp thoại xác nhận phê duyệt minh họa', caption: 'Hộp thoại xác nhận · Không phải business thực', category: 'modal' }] } } } : {}) })
+  const metadata = metadataSchema.parse({ doc_id: doc.id, project_id: 'demo-project', type: doc.type, module: 'approval', title: doc.title, language: 'vi', status: 'published', classification: 'internal', owner: 'BA Demo Team', version: '1.0.0', updated_at: '2026-10-11T09:00:00+07:00', related_ids: [], relations: doc.related.map(target_id=>({target_id,kind:'related'})), tags: ['demo','approval'], summary: doc.summary, ...(doc.type === 'screen' ? { screen: { route: '/requests/:id', menu_path: ['Home','Requests','Request Detail'], screenshot: { cover: './assets/main-screen-demo.png', gallery: [{ path: './assets/main-screen-demo.png', alt: 'Màn hình chi tiết yêu cầu minh họa', caption: 'Overview · Giao diện giả định cho project demo', category: 'overview' }, { path: './assets/approve-modal-demo.webp', alt: 'Hộp thoại xác nhận phê duyệt minh họa', caption: 'Hộp thoại xác nhận · Không phải business thực', category: 'modal' }] } } } : {}) })
   const file = path.join(root, documentPath(metadata))
   if (!await exists(file)) await atomicWrite(file, serialize(metadata, doc.body))
 }

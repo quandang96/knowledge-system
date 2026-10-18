@@ -1,4 +1,4 @@
 ---
 atlas_view: health
-title: Sức khỏe tri thức
+title: Chất lượng và truy vết
 ---

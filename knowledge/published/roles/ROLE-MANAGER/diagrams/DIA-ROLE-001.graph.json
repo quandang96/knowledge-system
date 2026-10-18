@@ -10,8 +10,8 @@
       "type": "role",
       "label": "Quản lý phòng ban",
       "position": {
-        "x": 90,
-        "y": 120
+        "x": 333.5,
+        "y": 30.5
       },
       "role_id": "ROLE-MANAGER",
       "rule_ids": [],
@@ -22,8 +22,8 @@
       "type": "system",
       "label": "Phòng ban được gán",
       "position": {
-        "x": 400,
-        "y": 120
+        "x": 265,
+        "y": 195.5
       },
       "rule_ids": [],
       "description": ""

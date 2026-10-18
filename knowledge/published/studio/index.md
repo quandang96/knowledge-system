@@ -1,4 +1,4 @@
 ---
 atlas_view: studio
-title: Document Studio
+title: Biên tập tài liệu
 ---

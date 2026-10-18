@@ -1,30 +1,35 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { idSchema, metadataSchema, type Metadata, type DocumentRecord, type Graph } from '../../../../packages/schemas/src/index'
+import { idSchema, isActiveType, metadataSchema, type Metadata, type DocumentRecord, type DraftRecord, type ReviewState, type Graph } from '../../../../packages/schemas/src/index'
+import { documentRelations } from '../../../../packages/schemas/src/relations'
 import { AppError, atomicWrite, checksum, exists, safePath, SerialQueue, walk } from './filesystem'
 import { parseMarkdown, serialize, validateBody } from './markdown'
 import { validateGraph } from './graph-validation'
+import { WorkspaceStore } from './workspace'
+import { documentChecklist } from './review'
 
 export const folders: Record<Metadata['type'], string> = { overview: 'overview', 'business-flow': 'business-flows', module: 'modules', screen: 'screens', function: 'functions', role: 'roles', permission: 'permissions', 'business-rule': 'business-rules', 'test-scenario': 'test-scenarios', reference: 'references' }
 export function documentPath(meta: Metadata) { return `${folders[meta.type]}/${meta.type === 'role' ? '' : `${meta.module}/`}${meta.doc_id}/index.md` }
 export function canonicalUrl(relative: string) { return `/${relative.replace(/index\.md$/, '').replace(/\.md$/, '')}` }
 export function template(meta: Metadata) {
   const headings: Record<string, string[]> = {
-    screen: ['Mục đích', 'Cách truy cập', 'Thành phần giao diện', 'Chức năng', 'Vai trò và quyền', 'Quy tắc nghiệp vụ', 'Trạng thái màn hình', 'Ngoại lệ', 'Kịch bản kiểm thử'],
+    screen: ['Mục đích', 'Cách truy cập', 'Thành phần giao diện', 'Chức năng', 'Vai trò và quyền', 'Quy tắc nghiệp vụ', 'Trạng thái màn hình', 'Ngoại lệ'],
     'business-flow': ['Mục tiêu nghiệp vụ', 'Tác nhân', 'Trigger và điều kiện', 'Các bước xử lý', 'Kết quả', 'Ngoại lệ'],
     function: ['Mục đích', 'Trigger', 'Input và output', 'Validation', 'Kết quả và lỗi', 'Quyền và quy tắc'],
     role: ['Trách nhiệm', 'Vai trò cha', 'Chính sách kế thừa', 'Phạm vi dữ liệu', 'Quyền', 'Ngoại lệ'],
     permission: ['Ma trận quyền', 'Điều kiện', 'Phạm vi dữ liệu', 'Quy tắc nguồn'],
     'business-rule': ['Nội dung quy tắc', 'Lý do', 'Điều kiện', 'Ngoại lệ', 'Mức ưu tiên', 'Ví dụ', 'Ngày hiệu lực'],
-    'test-scenario': ['Điều kiện tiên quyết', 'Vai trò và dữ liệu', 'Các bước kiểm thử', 'Kết quả mong đợi', 'Positive, negative và boundary cases']
   }
   return `# ${meta.title}\n\n${(headings[meta.type] || ['Tổng quan', 'Nội dung', 'Tài liệu liên quan']).map(h => `## ${h}\n\nĐiền nội dung đã được xác nhận tại đây.\n`).join('\n')}`
 }
 export class DocumentStore {
   readonly locks = new Map<string, SerialQueue>()
-  constructor(public root: string) { this.root = path.resolve(root) }
+  readonly allocationQueue = new SerialQueue()
+  readonly workspace: WorkspaceStore
+  private publishedCache?: { key: string; records: Promise<DocumentRecord[]>; byId: Promise<Map<string, DocumentRecord>> }
+  constructor(public root: string) { this.root = path.resolve(root); this.workspace = new WorkspaceStore(this.root) }
   lock<T>(id: string, job: () => Promise<T>) { idSchema.parse(id); if (!this.locks.has(id)) this.locks.set(id, new SerialQueue()); return this.locks.get(id)!.run(job) }
-  async init() { for (const dir of ['published', 'drafts', 'staging', '.knowledge-state']) { const dest = await safePath(this.root, dir); await fs.mkdir(dest, { recursive: true }) } }
+  async init() { for (const dir of ['published', 'drafts', 'staging', '.knowledge-state']) { const dest = await safePath(this.root, dir); await fs.mkdir(dest, { recursive: true }) }; await this.workspace.init([...await this.listPublished(), ...await this.listDrafts()]) }
   async activeState(): Promise<{ release?: string; revision?: string }> {
     const file = await safePath(this.root, '.knowledge-state/active.json')
     return await exists(file) ? JSON.parse(await fs.readFile(file, 'utf8')) : {}
@@ -40,8 +45,18 @@ export class DocumentStore {
     const assets = (await walk(await safePath(folder, 'assets'))).map(file => { const name = path.basename(file); return { path: `./assets/${name}`, preview_url: `/api/documents/${metadata.doc_id}/${draft ? 'draft-assets' : 'published-assets'}/${name}` } })
     return { metadata, body: parsed.body, revision: checksum(raw + JSON.stringify(graphs)), relative_path: relative, url: canonicalUrl(relative), graphs, assets, ...(!draft ? { published_revision: publishedRevision || (await this.activeState()).revision || 'initial' } : {}) }
   }
-  async listPublished(snapshot?: { release?: string; revision?: string }): Promise<DocumentRecord[]> {
+  async listPublished(snapshot?: { release?: string; revision?: string }, includeLegacy = false): Promise<DocumentRecord[]> {
     const state = snapshot || await this.activeState()
+    if (!state.release) return (await this.scanPublished(state)).filter(doc => includeLegacy || isActiveType(doc.metadata.type))
+    const key = `${state.release}:${state.revision}`
+    if (this.publishedCache?.key !== key) {
+      const records = this.scanPublished(state).catch(error => { this.publishedCache = undefined; throw error })
+      this.publishedCache = { key, records, byId: records.then(items => new Map(items.map(d => [d.metadata.doc_id, d])), () => new Map<string, DocumentRecord>()) }
+    }
+    // Callers may edit returned metadata. Never expose the immutable cache by reference.
+    return structuredClone((await this.publishedCache.records).filter(doc => includeLegacy || isActiveType(doc.metadata.type)))
+  }
+  private async scanPublished(state: { release?: string; revision?: string }) {
     const root = await this.activeRoot(state)
     const records: DocumentRecord[] = []
     for (const file of await walk(root)) {
@@ -53,13 +68,36 @@ export class DocumentStore {
     }
     return records
   }
-  async published(id: string, snapshot?: { release?: string; revision?: string }) { idSchema.parse(id); const record = (await this.listPublished(snapshot)).find(d => d.metadata.doc_id === id); if (!record) throw new AppError(404, 'Tài liệu chưa được xuất bản hoặc không nằm trong phạm vi truy cập.'); return record }
-  async draft(id: string) { idSchema.parse(id); const file = await safePath(this.root, 'drafts', id, 'index.md'); return this.readFile(file, `drafts/${id}/index.md`, true) }
-  async listDrafts() { const dir = await safePath(this.root, 'drafts'); const result: DocumentRecord[] = []; for (const entry of await fs.readdir(dir)) if (idSchema.safeParse(entry).success && await exists(path.join(dir, entry, 'index.md'))) result.push(await this.draft(entry)); return result }
+  async published(id: string, snapshot?: { release?: string; revision?: string }, includeLegacy = false) {
+    idSchema.parse(id)
+    const state = snapshot || await this.activeState()
+    const key = `${state.release}:${state.revision}`
+    if (!state.release || this.publishedCache?.key !== key) await this.listPublished(state, true)
+    const record = state.release && this.publishedCache?.key === key ? (await this.publishedCache.byId).get(id) : (await this.listPublished(state, true)).find(d => d.metadata.doc_id === id)
+    if (!record) throw new AppError(404, 'Tài liệu chưa được xuất bản hoặc không nằm trong phạm vi truy cập.')
+    if (!includeLegacy) this.assertActive(record.metadata)
+    return structuredClone(record)
+  }
+  assertActive(meta: Pick<Metadata, 'type'>) {
+    if (!isActiveType(meta.type)) throw new AppError(410, 'Loại tài liệu đã ngừng sử dụng. Nội dung cũ vẫn được giữ tại kho lưu trữ legacy để đọc và export.')
+  }
+  async draft(id: string, includeLegacy = false): Promise<DraftRecord> {
+    idSchema.parse(id)
+    const file = await safePath(this.root, 'drafts', id, 'index.md')
+    const doc = await this.readFile(file, `drafts/${id}/index.md`, true)
+    if (!includeLegacy) this.assertActive(doc.metadata)
+    const reviewFile = await safePath(this.root, '.knowledge-state/reviews', `${id}.json`)
+    const stored: ReviewState | null = await exists(reviewFile) ? JSON.parse(await fs.readFile(reviewFile, 'utf8')) : null
+    return { ...doc, review: stored?.revision === doc.revision ? stored : { status: 'draft', revision: doc.revision }, checklist: documentChecklist(doc) }
+  }
+  async listDrafts(includeLegacy = false) { const dir = await safePath(this.root, 'drafts'); const result: DraftRecord[] = []; for (const entry of await fs.readdir(dir)) if (idSchema.safeParse(entry).success && await exists(path.join(dir, entry, 'index.md'))) { const doc = await this.draft(entry, true); if (includeLegacy || isActiveType(doc.metadata.type)) result.push(doc) }; return result }
   async create(input: unknown, body: string | undefined, user: string) {
     const meta = metadataSchema.parse(input)
+    this.assertActive(meta)
+    delete meta.verification
+    await this.workspace.validateLocation(meta.project_id, meta.module)
     return this.lock(meta.doc_id, async () => {
-      if ((await this.listPublished()).some(d => d.metadata.doc_id === meta.doc_id) || await exists(await safePath(this.root, 'drafts', meta.doc_id, 'index.md'))) throw new AppError(409, 'ID đã tồn tại. Chọn sửa bản nháp hiện tại hoặc dùng ID mới.')
+      if ((await this.listPublished(undefined, true)).some(d => d.metadata.doc_id === meta.doc_id) || await exists(await safePath(this.root, 'drafts', meta.doc_id, 'index.md'))) throw new AppError(409, 'ID đã tồn tại. Chọn sửa bản nháp hiện tại hoặc dùng ID mới.')
       return this.writeDraft({ ...meta, status: 'draft', updated_at: new Date().toISOString() }, body || template(meta), user)
     })
   }
@@ -79,11 +117,15 @@ export class DocumentStore {
       const current = await this.draft(id)
       if (!revision || current.revision !== revision) throw new AppError(409, 'Bản nháp đã thay đổi. Tải lại để đối chiếu trước khi lưu.', { current_revision: current.revision })
       const meta = metadataSchema.parse(input)
+      delete meta.verification
       if (meta.doc_id !== id || meta.project_id !== current.metadata.project_id || meta.type !== current.metadata.type || meta.module !== current.metadata.module) throw new AppError(400, 'ID, project, loại và module không được đổi sau khi tạo. Chuyển thư mục chưa được hỗ trợ.')
       return this.writeDraft({ ...meta, status: 'draft', updated_at: new Date().toISOString() }, body, user)
     })
   }
   async writeDraft(meta: Metadata, body: string, user: string) {
+    this.assertActive(meta)
+    // Canonical writes use relations only. related_ids is a read adapter for old files.
+    meta = { ...meta, relations: documentRelations(meta), related_ids: [] }
     validateBody(body)
     const file = await safePath(this.root, 'drafts', meta.doc_id, 'index.md')
     const raw = serialize(meta, body)
@@ -91,6 +133,35 @@ export class DocumentStore {
     await atomicWrite(await safePath(this.root, 'drafts', meta.doc_id, 'draft-meta.json'), JSON.stringify({ editor: user, updated_at: meta.updated_at, revision: checksum(raw), base_published_commit: (await this.activeState()).revision || null }, null, 2))
     await this.audit(user, 'save-draft', meta.doc_id)
     return this.draft(meta.doc_id)
+  }
+  async createAutomatic(input: Omit<Metadata, 'doc_id'>, body: string | undefined, user: string) {
+    return this.allocationQueue.run(async () => {
+      const prefix: Record<string, string> = { overview: 'OV', screen: 'SCR', function: 'FUNC', 'business-flow': 'BF', module: 'MOD', role: 'ROLE', permission: 'PERM', 'business-rule': 'BR', 'test-scenario': 'TC', reference: 'REF' }
+      const stem = `${prefix[input.type]}-${input.project_id.toUpperCase().replace(/-/g, '').slice(0, 14)}-${input.module.toUpperCase().replace(/-/g, '').slice(0, 14)}`
+      const used = new Set([...await this.listPublished(), ...await this.listDrafts()].map(d => d.metadata.doc_id))
+      let number = 1
+      while (used.has(`${stem}-${String(number).padStart(3, '0')}`)) number++
+      return this.create({ ...input, doc_id: `${stem}-${String(number).padStart(3, '0')}` }, body, user)
+    })
+  }
+  async review(id: string, revision: string, action: 'submit' | 'approve' | 'request_changes', user: string, reason = '') {
+    return this.lock(id, async () => {
+      const doc = await this.draft(id)
+      if (doc.revision !== revision) throw new AppError(409, 'Bản nháp đã thay đổi. Tải lại trước khi duyệt.')
+      const review: ReviewState = action === 'submit'
+        ? { status: 'in_review', revision, submitted_by: user, submitted_at: new Date().toISOString() }
+        : { ...doc.review, status: action === 'approve' ? 'approved' : 'changes_requested', reviewer: user, reviewed_at: new Date().toISOString(), reason }
+      if (action !== 'submit' && doc.review.status !== 'in_review') throw new AppError(409, 'Tài liệu chưa được gửi duyệt hoặc đã thay đổi sau khi gửi.')
+      if (action !== 'submit' && doc.review.submitted_by === user) throw new AppError(403, 'Người gửi duyệt cần một người khác đánh giá nội dung.')
+      if (action === 'request_changes' && !reason.trim()) throw new AppError(400, 'Nhập nội dung cần chỉnh sửa.')
+      if (action === 'approve' || action === 'submit') {
+        const missing = doc.checklist.filter(item => !item.passed)
+        if (missing.length) throw new AppError(400, 'Hoàn thiện checklist trước khi gửi/duyệt.', missing)
+      }
+      await atomicWrite(await safePath(this.root, '.knowledge-state/reviews', `${id}.json`), JSON.stringify(review, null, 2))
+      await this.audit(user, `review-${action}`, id)
+      return this.draft(id)
+    })
   }
   async audit(user: string, action: string, id: string) { await fs.appendFile(await safePath(this.root, '.knowledge-state/audit.jsonl'), JSON.stringify({ user, action, doc_id: id, at: new Date().toISOString() }) + '\n', { mode: 0o600 }) }
 }

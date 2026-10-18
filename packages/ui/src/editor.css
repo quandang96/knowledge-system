@@ -1,0 +1,69 @@
+/* Rich editor owns its typography; reader prose styles must not leak into it. */
+.atlas-editor, .atlas-editor .tiptap, .editor-panel, .editor-area { min-width: 0; }
+.atlas-editor .tiptap { font: 400 16px/1.75 var(--font-body); overflow-wrap: anywhere; white-space: pre-wrap; outline: none; min-height: 390px; color: var(--text-primary); }
+.atlas-editor .tiptap > :first-child { margin-top: 0; }
+.atlas-editor .tiptap p { margin: 0 0 .9em; line-height: 1.75; }
+.atlas-editor .tiptap :is(h1,h2,h3) { line-height: 1.3; margin: 1.25em 0 .55em; border: 0; padding: 0; color: var(--text-primary); }
+.atlas-editor .tiptap h1 { font-size: 28px; }
+.atlas-editor .tiptap h2 { font-size: 23px; }
+.atlas-editor .tiptap h3 { font-size: 19px; }
+.atlas-editor .tiptap :is(ul,ol) { padding-inline-start: 24px; margin: 12px 0 20px; }
+.atlas-editor .tiptap li { margin: 8px 0; }
+.atlas-editor .tiptap li > p { margin-bottom: 4px; }
+.atlas-editor .tiptap a { color: var(--primary); text-decoration: underline; }
+.atlas-editor .tiptap blockquote { border-inline-start: 3px solid var(--primary); padding: 12px 20px; margin: 20px 0; background: var(--surface-muted); }
+.atlas-editor .tiptap pre, .atlas-editor .tiptap .tableWrapper { max-width: 100%; overflow: auto; margin: 20px 0; }
+.atlas-editor .tiptap pre { font: 13px/1.7 ui-monospace, monospace; white-space: pre; padding: 20px; border-radius: 8px; background: var(--surface-muted); }
+.atlas-editor .tiptap code { font-family: ui-monospace, monospace; font-size: .88em; background: var(--surface-muted); }
+.atlas-editor .tiptap pre code { font: inherit; background: transparent; }
+.atlas-editor .tiptap table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+.atlas-editor .tiptap :is(th,td) { border: 1px solid var(--border); padding: 12px; min-width: 100px; vertical-align: top; }
+.atlas-editor .tiptap th { background: var(--surface-muted); text-align: start; }
+.atlas-editor .tiptap td > p, .atlas-editor .tiptap th > p { margin: 0; }
+.atlas-editor .tiptap .selectedCell { background: var(--primary-soft); }
+.editor-toolbar .v-btn, .viewer-toolbar .v-btn { min-width: 44px !important; min-height: 44px; }
+.editor-image-node { margin: 24px 0; border: 1px solid var(--border); border-radius: 8px; padding: 12px; white-space: normal; }
+.editor-image-node.image-selected { outline: 2px solid var(--primary); outline-offset: 2px; }
+.image-node-actions, .viewer-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 8px 12px; }
+.image-node-actions { padding: 0 0 8px; }
+.image-library { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 16px; margin-top: 20px; }
+.image-library button { border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: start; overflow-wrap: anywhere; font-size: 12px; }
+.image-library img { display: block; width: 100%; height: 100px; object-fit: contain; margin-bottom: 8px; }
+.image-upload-placeholder { display: inline-flex; width: 100%; min-height: 140px; margin: 16px 0; align-items: center; justify-content: center; border: 1px dashed var(--control-outline); background: var(--surface-muted); border-radius: 8px; color: var(--text-secondary); font: 14px/1.5 var(--font-body); }
+.upload-status { padding: 16px 24px; background: var(--surface-muted); border-block: 1px solid var(--border); }
+.upload-status p { font-size: 14px; margin-bottom: 8px; }
+.media-image { display: block; position: relative; margin: 0; min-width: 0; }
+.media-image img { display: block; max-width: 100%; height: auto; margin-inline: auto; object-fit: contain; }
+.media-image .media-loading { position: absolute; opacity: 0; pointer-events: none; }
+.media-zoomable { cursor: zoom-in; }
+.media-image figcaption, .media-caption { margin: 12px 0; text-align: center; font: 13px/1.6 var(--font-body); color: var(--text-muted); }
+.media-skeleton { min-height: 180px; position: relative; }
+.media-skeleton > span { position: absolute; inset: 0; display: grid; place-content: center; color: var(--text-secondary); font-size: 14px; }
+.media-error { margin: 16px 0; }
+.image-lightbox, .viewer-fullscreen { background: var(--surface); color: var(--text-primary); border-radius: 12px; overflow: hidden; }
+.zoom-viewer { min-width: 0; }
+.viewer-toolbar { border-bottom: 1px solid var(--border); font: 500 13px/1.5 var(--font-body); }
+.viewer-toolbar output { min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+.viewer-canvas { overflow: hidden; min-height: 180px; touch-action: none; cursor: grab; padding: 20px; }
+.viewer-canvas:active { cursor: grabbing; }
+.viewer-canvas:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.viewer-transform { transform-origin: center; }
+.viewer-transform > img { display: block; max-width: 100%; height: auto; max-height: 70dvh; object-fit: contain; margin: auto; user-select: none; }
+.viewer-fullscreen { display: flex; flex-direction: column; height: 100dvh; border-radius: 0; }
+.viewer-fullscreen .viewer-canvas { flex: 1; display: grid; place-items: center; }
+.viewer-fullscreen .viewer-transform { width: 100%; }
+.viewer-fullscreen .viewer-transform > img { max-height: 85dvh; }
+.viewer-fullscreen-host { flex: 1; display: flex; min-height: 0; }
+.diagram-loading { position: relative; min-height: 220px; }
+.diagram-loading > span { position: absolute; inset: 0; display: grid; place-content: center; font-size: 14px; color: var(--text-secondary); }
+.mermaid-preview { padding: 0; overflow: hidden; border-radius: 12px; }
+.mermaid-svg svg { display: block; width: 100%; max-width: 100%; height: auto; max-height: min(65dvh,640px); }
+.viewer-fullscreen .mermaid-svg svg { max-height: calc(100dvh - 110px); }
+.diagram-source { border-top: 1px solid var(--border); padding: 12px 16px; }
+.diagram-source summary { font-size: 13px; color: var(--text-secondary); }
+.diagram-source pre { overflow: auto; padding: 16px; max-height: 360px; white-space: pre; background: var(--surface-muted); font: 13px/1.7 ui-monospace, monospace; }
+.mermaid-error { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow: auto; font-size: 13px; }
+.download-action { display: inline-flex; align-items: center; flex-wrap: wrap; max-width: 100%; }
+.download-error { width: 100%; font-size: 12px; color: var(--error); padding: 4px 12px; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .v-skeleton-loader__bone::after { animation: none; } }
+@media (max-width: 760px) { .image-node-actions { gap: 0; } .viewer-toolbar { padding: 8px; } .viewer-canvas { padding: 12px; } }

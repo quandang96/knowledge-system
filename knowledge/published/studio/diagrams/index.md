@@ -1,4 +1,4 @@
 ---
 atlas_view: diagrams
-title: Diagram Studio
+title: Biên tập sơ đồ
 ---

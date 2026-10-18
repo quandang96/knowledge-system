@@ -9,14 +9,18 @@ status: published
 classification: internal
 owner: BA Demo Team
 version: 1.0.0
-related_ids:
-  - PERM-APP-001
-  - BR-014
-  - FUNC-APP-003
+related_ids: []
 tags:
   - demo
   - approval
-updated_at: 2026-10-11T09:00:00+07:00
+relations:
+  - target_id: PERM-APP-001
+    kind: related
+  - target_id: BR-014
+    kind: related
+  - target_id: FUNC-APP-003
+    kind: related
+updated_at: 2026-10-18T15:46:36.838Z
 summary: Trách nhiệm, phạm vi dữ liệu và nguyên tắc kế thừa quyền của vai trò Manager.
 source_links: []
 ---

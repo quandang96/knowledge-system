@@ -7,7 +7,7 @@ import { serialize } from './markdown'
 
 export async function exportBundle(store: DocumentStore, id: string, draft: boolean) {
   const active = await store.activeState()
-  const doc = draft ? await store.draft(id) : await store.published(id, active)
+  const doc = draft ? await store.draft(id, true) : await store.published(id, active, true)
   const folder = draft ? await safePath(store.root, 'drafts', id) : await safePath(await store.activeRoot(active), path.dirname(doc.relative_path))
   const archive: Record<string, Uint8Array> = {
     'index.md': strToU8(serialize(doc.metadata, doc.body)),

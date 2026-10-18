@@ -1,1 +1,5 @@
 @import '@atlas/ui/styles.css';
+@import '@atlas/ui/workspace.css';
+@import '@atlas/ui/controls.css';
+@import '@atlas/ui/editor.css';
+@import '@atlas/ui/layout.css';

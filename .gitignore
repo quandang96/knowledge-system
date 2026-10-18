@@ -16,3 +16,5 @@ knowledge/.knowledge-state/
 test-results/
 .playwright-cli/
 output/playwright/
+.agents
+tests

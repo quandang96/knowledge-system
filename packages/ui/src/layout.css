@@ -1,0 +1,69 @@
+/* Reading measure is independent of the canvas available to media and tables. */
+.main-content { max-width: 1700px; padding-inline: 28px; }
+.document-layout { display: block; width: 100%; max-width: 1240px; margin-inline: auto; }
+.document-article { min-width: 0; width: 100%; padding: 32px; border-radius: 12px; }
+.document-toc { display: none; }
+.mobile-toc { display: block; margin: 24px 0; padding-block: 16px; border-block: 1px solid var(--border); }
+.mobile-toc > a { display: block; color: var(--text-secondary); font-size: 14px; padding: 6px 0; }
+.document-body { min-width: 0; overflow-wrap: anywhere; }
+.document-body p, .document-body > ul, .document-body > ol { max-width: 86ch; }
+.document-body :is(table,pre), .atlas-wide-block, .screenshot-gallery, .doc-diagrams { width: 100%; max-width: 100%; min-width: 0; }
+.document-body table { display: block; width: 100%; overflow-x: auto; }
+.document-body pre { white-space: pre; overflow-x: auto; }
+.document-header h1 { text-wrap: balance; }
+.document-header .document-meta, .document-actions { flex-wrap: wrap; }
+.studio-layout { grid-template-columns: 180px minmax(0,1fr); }
+.studio-layout.drafts-collapsed { grid-template-columns: minmax(0,1fr); }
+.studio-layout.drafts-collapsed .draft-sidebar { display: none; }
+.studio-actions { flex-wrap: wrap; }
+.editor-area { padding: 28px; }
+.editor-metadata { grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(100px,1fr); gap: 24px; }
+.editor-metadata > *, .form-grid > *, .metadata-more-grid > * { min-width: 0; }
+/* Fields with details already reserve 22px for hints and validation. Add a
+   small row gap there; metadata/gallery hide details and need the full gap. */
+.new-doc-form .form-grid, .metadata-more-grid { row-gap: 8px; column-gap: 24px; }
+.gallery-edit-item > .gallery-edit-fields { gap: 24px; }
+.new-doc-form > :is(.v-text-field, .v-select, .v-textarea, .v-autocomplete),
+.settings-layout .panel > :is(.v-text-field, .v-select, .v-textarea, .v-autocomplete),
+.settings-add > :is(.v-text-field, .v-select),
+.settings-layout .form-grid > :is(.v-text-field, .v-select),
+.diagram-inspector > :is(.v-text-field, .v-select, .v-textarea) { margin-bottom: 8px; }
+.module-row { margin-block: 20px; }
+.reference-filters .form-grid { row-gap: 16px; column-gap: 24px; }
+.semantic-icon { color: var(--icon); }
+.semantic-icon.semantic-primary { color: var(--primary); background: var(--primary-soft); }
+.semantic-icon.semantic-info { color: var(--info); background: var(--info-soft); }
+.semantic-icon.semantic-diagram { color: var(--diagram-color); background: var(--diagram-soft); }
+.semantic-icon.semantic-media { color: var(--media-color); background: var(--media-soft); }
+.semantic-icon.semantic-warning { color: var(--warning); background: var(--warning-soft); }
+.semantic-icon.semantic-success { color: var(--success); background: var(--success-soft); }
+.semantic-icon.semantic-error { color: var(--error); background: var(--error-soft); }
+.nav-link > .semantic-icon { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; }
+.nav-link { padding-block: 8px; border-inline-start: 3px solid transparent; }
+.nav-link.active { border-inline-start-color: var(--primary); }
+.catalog-toolbar .v-field { border-radius: 0; }
+.catalog-toolbar > .v-input { min-width: 140px; }
+.project-switch .v-field { border-radius: 0; }
+.project-switch .v-select__selection { font-size: 14px; }
+.flow-node { width: 210px; min-width: 0; min-height: 84px; padding: 16px; border-radius: 12px; border-color: var(--primary); background: var(--primary-soft); box-shadow: none; }
+.flow-node strong { font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; white-space: normal; }
+.flow-node .node-kind { font-size: 12px; letter-spacing: .03em; }
+.flow-node.start, .flow-node.end { border-radius: 20px; }
+.flow-node.role { color: var(--text-primary); background: var(--diagram-soft); border-color: var(--diagram-color); }
+.flow-node.screen { background: var(--media-soft); border-color: var(--media-color); }
+.flow-node .vue-flow__handle { width: 10px; height: 10px; }
+.vue-flow__edge-text { font-family: var(--font-body); }
+.vue-flow__controls { box-shadow: 0 1px 4px rgb(32 48 71 / 4%); }
+.vue-flow__controls-button { width: 36px; height: 36px; color: var(--icon); background: var(--surface); border-color: var(--border); }
+@media (max-width: 1439px) { .main-content { padding-inline: 24px; } }
+@media (max-width: 1100px) { .studio-layout { grid-template-columns: 160px minmax(0,1fr); } }
+@media (max-width: 760px) {
+  .main-content { padding-inline: 16px; }
+  .document-layout { margin: 0; }
+  .document-article { padding: 20px 16px; }
+  .editor-area { padding: 24px 16px; }
+  .studio-layout { grid-template-columns: minmax(0,1fr); }
+  .editor-metadata { grid-template-columns: minmax(0,1fr); }
+  .editor-metadata > .v-input:first-child { grid-column: auto; }
+  .document-actions .v-btn { max-width: 100%; }
+}

@@ -3,7 +3,15 @@ import { MarkdownManager } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
-export const editorExtensions = () => [StarterKit.configure({ underline: false, link: { openOnClick: false, protocols: ['http','https'] } }), Image.configure({ inline: false, allowBase64: false }), TableKit]
+export const MarkdownImage = Image.extend({
+  renderMarkdown(node) {
+    const alt = String(node.attrs?.alt || '').replace(/[\\[\]]/g, '\\$&').replace(/[\r\n]/g, ' ')
+    const title = String(node.attrs?.title || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/[\r\n]/g, ' ')
+    const src = String(node.attrs?.src || '')
+    return `![${alt}](${src}${title ? ` "${title}"` : ''})`
+  }
+})
+export const editorExtensions = () => [StarterKit.configure({ underline: false, link: { openOnClick: false, protocols: ['http','https'] } }), MarkdownImage.configure({ inline: false, allowBase64: false }), TableKit.configure({ table: { renderWrapper: true } })]
 const parser = new MarkdownIt({ html: false })
 export function semanticSignature(source: string): string {
   const tokens = parser.parse(source, {})

@@ -1,0 +1,231 @@
+/* Shared interaction states. Keep Vuetify's label notch, validation and sizing. */
+:is(.v-application, .v-overlay-container) .v-input {
+  /* A neighboring textarea or validation message must not stretch this field. */
+  align-self: start;
+}
+:is(.v-application, .v-overlay-container) .v-field {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-outlined {
+  background: var(--surface);
+  /* A CSS radius keeps the regular notch inset; rounded props use pill geometry. */
+  border-radius: 8px;
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-outlined .v-field__outline {
+  --v-field-border-opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-outlined:not(.v-field--focused, .v-field--error, .v-field--disabled) .v-field__outline {
+  color: var(--control-outline);
+}
+@media (hover: hover) {
+  :is(.v-application, .v-overlay-container) .v-field--variant-outlined:not(.v-field--focused, .v-field--error, .v-field--disabled):hover .v-field__outline {
+    color: var(--control-outline-hover);
+  }
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-underlined {
+  background: var(--surface);
+  border-radius: 0;
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-underlined .v-field__outline {
+  color: var(--atlas-input-line);
+  --v-field-border-opacity: 1;
+}
+@media (hover: hover) {
+  :is(.v-application, .v-overlay-container) .v-field--variant-underlined:not(.v-field--disabled, .v-field--focused, .v-field--error):hover .v-field__outline { color: var(--atlas-input-line-hover); }
+}
+:is(.v-application, .v-overlay-container) .v-field--variant-underlined.v-field--focused .v-field__outline { color: var(--primary); }
+:is(.v-application, .v-overlay-container) .v-field--variant-underlined.v-field--error .v-field__outline { color: var(--error); --v-field-border-width: 2px; }
+/* Grow through padding, so the label and value keep Vuetify's shared baseline. */
+:is(.v-application, .v-overlay-container) .v-input--density-comfortable .v-field--variant-underlined { --v-field-padding-bottom: 10px; }
+/* Vuetify's 2px active underline / outlined border is the focus indicator.
+   An additional outer ring creates a second frame around underlined fields. */
+:is(.v-application, .v-overlay-container) .v-field:is(.v-field--variant-underlined, .v-field--variant-outlined).v-field--focused {
+  outline: none;
+  box-shadow: none;
+}
+:is(.v-application, .v-overlay-container) .v-field .v-field-label {
+  color: var(--text-secondary);
+  opacity: 1;
+  letter-spacing: 0;
+}
+/* Match the value's font metrics. Vuetify scales 16px to a 12px floating label.
+   Leave --v-field-label-scale intact: its numeric part also drives JS animation. */
+:is(.v-application, .v-overlay-container) .v-field .v-field-label:not(.v-field-label--floating) {
+  font-size: inherit;
+}
+:is(.v-application, .v-overlay-container) .v-field--focused:not(.v-field--error, .v-field--disabled) .v-field-label {
+  color: var(--primary);
+}
+:is(.v-application, .v-overlay-container) .v-field--error:not(.v-field--disabled) .v-field-label {
+  color: var(--error);
+}
+:is(.v-application, .v-overlay-container) .v-field__input { opacity: 1; }
+:is(.v-application, .v-overlay-container) .v-field__input::placeholder,
+:is(.v-application, .v-overlay-container) .v-field__input input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+/* Preserve Vuetify's placeholder hiding while an un-floated label occupies the field. */
+:is(.v-application, .v-overlay-container) .v-field:not(.v-field--active, .v-field--no-label) input::placeholder,
+:is(.v-application, .v-overlay-container) .v-field:not(.v-field--active, .v-field--no-label) textarea::placeholder { opacity: 0; }
+:is(.v-application, .v-overlay-container) .v-field__prepend-inner > .v-icon,
+:is(.v-application, .v-overlay-container) .v-field__append-inner > .v-icon,
+:is(.v-application, .v-overlay-container) .v-field__clearable > .v-icon {
+  color: var(--text-muted);
+  font-size: 20px;
+  opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-field--error:not(.v-field--disabled) :is(.v-field__prepend-inner, .v-field__append-inner, .v-field__clearable) > .v-icon { color: var(--error); }
+:is(.v-application, .v-overlay-container) .v-field--focused:not(.v-field--error, .v-field--disabled) :is(.v-field__prepend-inner, .v-field__append-inner, .v-field__clearable) > .v-icon { color: var(--primary); }
+:is(.v-application, .v-overlay-container) .v-input__details .v-messages {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-messages__message { line-height: 1.5; }
+:is(.v-application, .v-overlay-container) .v-input--error:not(.v-input--disabled) .v-messages { color: var(--error); }
+.editor-metadata .v-input--error .v-input__details,
+.gallery-edit-fields .v-input--error .v-input__details { display: flex; }
+:is(.v-application, .v-overlay-container) .v-field.v-field--disabled {
+  background: var(--control-disabled);
+  color: var(--control-disabled-text);
+  opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-field--disabled :is(.v-field-label, .v-icon) { color: var(--control-disabled-text); }
+:is(.v-application, .v-overlay-container) .v-field--disabled .v-field__outline { color: var(--control-disabled-outline); }
+:is(.v-application, .v-overlay-container) .v-input--disabled .v-input__details { opacity: 1; }
+:is(.v-application, .v-overlay-container) .v-selection-control .v-label { color: var(--text-primary); opacity: 1; }
+:is(.v-application, .v-overlay-container) .v-selection-control--disabled { opacity: 1; }
+:is(.v-application, .v-overlay-container) .v-selection-control--disabled .v-label,
+:is(.v-application, .v-overlay-container) .v-selection-control--disabled .v-selection-control__input > .v-icon { color: var(--control-disabled-text); opacity: 1; }
+:is(.v-application, .v-overlay-container) .v-switch .v-selection-control:not(.v-selection-control--dirty, .v-selection-control--error) .v-switch__track {
+  background: var(--control-outline);
+  opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-switch .v-selection-control--dirty .v-switch__track { opacity: .75; }
+:is(.v-application, .v-overlay-container) .v-switch .v-switch__thumb { border: 1px solid var(--control-outline); box-shadow: none; }
+:is(.v-application, .v-overlay-container) .v-selection-control--focus-visible .v-selection-control__input { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Vuetify color utilities use !important; disabled colors must take precedence. */
+:is(.v-application, .v-overlay-container) .v-btn.v-btn--disabled {
+  color: var(--control-disabled-text) !important;
+  opacity: 1;
+}
+:is(.v-application, .v-overlay-container) .v-btn.v-btn--disabled:is(.v-btn--variant-flat, .v-btn--variant-elevated, .v-btn--variant-tonal) {
+  background: var(--control-disabled) !important;
+}
+:is(.v-application, .v-overlay-container) .v-btn.v-btn--disabled :is(.v-btn__overlay, .v-btn__underlay) { opacity: 0; }
+:is(.v-application, .v-overlay-container) .v-btn--variant-outlined { border-color: var(--control-outline); }
+:is(.v-application, .v-overlay-container) .v-btn--variant-outlined:not(.v-btn--disabled):hover { border-color: currentColor; }
+:is(.v-application, .v-overlay-container) .v-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+/* Semantic alert surfaces avoid stacked opacity on text and icons. */
+:is(.v-application, .v-overlay-container) .v-alert--variant-tonal.text-error { background: var(--error-soft); }
+:is(.v-application, .v-overlay-container) .v-alert--variant-tonal.text-warning { background: var(--warning-soft); }
+:is(.v-application, .v-overlay-container) .v-alert--variant-tonal.text-success { background: var(--success-soft); }
+:is(.v-application, .v-overlay-container) .v-alert--variant-tonal.text-info { background: var(--info-soft); }
+:is(.v-application, .v-overlay-container) .v-alert--variant-tonal:is(.text-error, .text-warning, .text-success, .text-info) .v-alert__underlay { opacity: 0; }
+
+.catalog-table tbody tr { transition: background-color .15s ease; }
+.catalog-table tbody tr:hover, .catalog-table tbody tr:focus-within { background: var(--row-hover); }
+.catalog-table tbody tr[aria-selected="true"] { background: var(--row-selected); box-shadow: inset 3px 0 var(--primary); }
+.catalog-table th, .catalog-table td { border-color: var(--border-subtle); }
+.nav-link .v-icon { color: var(--icon); }
+.nav-link.active { color: var(--primary-hover); box-shadow: inset 3px 0 var(--primary); }
+.nav-link.active .v-icon { color: var(--primary); }
+.draft-item.active, .draft-item.active strong, .search-result.is-selected, .search-result:hover,
+.review-inline .text-link, .prose blockquote a { color: var(--primary-hover); }
+.text-link:hover, .breadcrumb-line a:hover, .prose a:hover { color: var(--primary-hover); }
+.tree-details, .nav-soon, .search-trigger, kbd, .gallery-thumbnails button,
+.gallery-edit-item img, .history-item, .prose table, .tiptap td, .tiptap th { border-color: var(--border); }
+.tree-details, .search-result > .v-icon, .catalog-illustration span,
+.history-item p, .history-item code, .lightbox p, .source-links,
+.login-intro .eyebrow, .login-card small, .studio-empty p { color: var(--text-secondary); }
+.tree-doc:hover { color: var(--primary); background: var(--primary-soft); }
+.search-trigger:hover { border-color: var(--control-outline-hover); }
+.search-trigger kbd, .gallery-thumbnails button, .lightbox, .history-item { background: var(--surface); }
+kbd { color: var(--text-secondary); }
+.gallery-thumbnails button.selected { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.studio-empty { color: var(--text-secondary); background: var(--surface); border-color: var(--control-outline); }
+.studio-empty h2 { color: var(--text-primary); }
+.api-error-details { color: var(--error); background: var(--error-soft); }
+
+/* Vuetify's bg-/text- utilities are important; these states retain exact tokens. */
+:is(.v-application, .v-overlay-container) .v-btn.bg-primary:not(.v-btn--disabled):hover { background: var(--primary-hover) !important; }
+:is(.v-application, .v-overlay-container) .v-btn.bg-primary:not(.v-btn--disabled):active { background: var(--primary-pressed) !important; }
+:is(.v-application, .v-overlay-container) .v-btn.bg-primary .v-btn__overlay { opacity: 0; }
+:is(.v-application, .v-overlay-container) .v-btn--variant-outlined:not(.v-btn--disabled) { background: var(--surface); color: var(--primary); }
+:is(.v-application, .v-overlay-container) .v-btn--variant-outlined:not(.v-btn--disabled):hover { background: var(--primary-soft); color: var(--primary-hover); }
+:is(.v-application, .v-overlay-container) .v-btn--variant-text:not(.v-btn--disabled):hover { background: var(--surface-muted); }
+:is(.v-application, .v-overlay-container) :is(.v-btn--variant-tonal, .v-chip--variant-tonal).text-primary,
+:is(.v-application, .v-overlay-container) .v-btn--variant-text.text-primary:hover { color: var(--primary-hover) !important; }
+:is(.v-application, .v-overlay-container) :is(.v-btn--variant-tonal, .v-chip--variant-tonal).text-primary { background: var(--primary-soft); }
+:is(.v-application, .v-overlay-container) :is(.v-btn--variant-tonal, .v-chip--variant-tonal).text-primary :is(.v-btn__underlay, .v-chip__underlay) { opacity: 0; }
+:is(.v-application, .v-overlay-container) .v-tab--selected { background: var(--primary-soft); color: var(--primary-hover) !important; }
+:is(.v-application, .v-overlay-container) .v-list-item--active.text-primary { color: var(--primary-hover) !important; }
+.flow-node.screen, .flow-node.system { background: var(--primary-soft); border-color: var(--primary); }
+.flow-node { border-color: var(--control-outline); }
+:is(.v-application, .v-overlay-container) .v-chip--variant-tonal.text-success { background: var(--success-soft); }
+:is(.v-application, .v-overlay-container) .v-chip--variant-tonal.text-warning { background: var(--warning-soft); }
+:is(.v-application, .v-overlay-container) .v-chip--variant-tonal.text-error { background: var(--error-soft); }
+:is(.v-application, .v-overlay-container) .v-chip--variant-tonal.text-info { background: var(--info-soft); }
+:is(.v-application, .v-overlay-container) .v-chip--variant-tonal:is(.text-success, .text-warning, .text-error, .text-info) .v-chip__underlay { opacity: 0; }
+
+.reference-picker { padding: 28px; max-height: calc(100dvh - 48px); overflow-y: auto; color: var(--text-primary); background: var(--surface); border: 1px solid var(--border); border-radius: 14px; }
+.reference-picker-heading, .reference-picker-footer { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.reference-picker-heading { margin-bottom: 22px; }
+.reference-picker-heading h2 { font-size: 22px; margin-top: 6px; }
+.reference-picker .v-field kbd { font-size: 12px; white-space: nowrap; }
+.reference-filters { margin: 16px 0; }
+.reference-filters summary { font-size: 13px; color: var(--text-secondary); }
+.reference-filters .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.reference-result-status { color: var(--text-secondary); font-size: 13px; margin: 16px 0 10px; }
+.reference-results { max-height: 42dvh; overflow-y: auto; }
+.reference-result { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: start; gap: 12px; padding: 16px 12px; width: 100%; border: 1px solid transparent; border-bottom-color: var(--border-subtle); border-radius: 8px; background: var(--surface); text-align: left; color: var(--text-primary); }
+.reference-result > .v-icon { color: var(--icon); font-size: 20px; margin-top: 2px; }
+.reference-result.is-focused, .reference-result:hover { background: var(--row-hover); border-color: var(--border); }
+.reference-result.is-selected { background: var(--row-selected); border-color: var(--primary); }
+.reference-result.is-selected > .v-icon { color: var(--primary); }
+.reference-result strong { display: block; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.reference-result small { display: block; font-size: 12px; color: var(--text-secondary); margin: 6px 0; overflow-wrap: anywhere; }
+.reference-preview { display: block; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.reference-publication { font-size: 12px; white-space: nowrap; padding: 3px 7px; border-radius: 5px; background: var(--success-soft); color: var(--success); }
+.reference-publication.is-draft { background: var(--info-soft); color: var(--info); }
+.reference-empty { padding: 28px 16px; text-align: center; color: var(--text-secondary); }
+.reference-empty h3 { margin: 12px 0 8px; }
+.reference-picker-footer { padding-top: 20px; margin-top: 16px; border-top: 1px solid var(--border); }
+.relation-editor .section-heading { flex-wrap: wrap; gap: 12px; }
+.relation-direction { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin: 20px 0 10px; }
+.relation-item { display: flex; align-items: center; gap: 12px; padding: 14px; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-muted); }
+.relation-item-document { flex: 1; min-width: 0; }
+.relation-item-document strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
+.relation-item-document small, .relation-backlinks small, .legacy-source { display: block; font-size: 12px; color: var(--text-secondary); }
+.relation-item-document small { margin-top: 5px; overflow-wrap: anywhere; }
+.relation-item > .v-select { flex: 0 0 200px; }
+.relation-warning { display: flex; align-items: start; gap: 6px; color: var(--warning); font-size: 13px; margin-top: 8px; }
+.relation-backlinks { margin: 20px 0; padding-top: 18px; border-top: 1px solid var(--border-subtle); }
+.reference-field { margin-bottom: 20px; }
+.reference-field > .field-help { display: block; margin-bottom: 8px; }
+.reference-field-item { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid var(--border); background: var(--surface-muted); border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+.reference-field-item > span { flex: 1; overflow-wrap: anywhere; }
+.reference-field-item .v-btn { flex-shrink: 0; }
+.reference-field-item .v-btn:hover { color: var(--error); }
+.editor-reference-action { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 20px; border-bottom: 1px solid var(--border-subtle); }
+.legacy-source { white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: 14px; line-height: 1.75; padding: 20px; background: var(--surface-muted); border-radius: 8px; }
+@media (max-width: 760px) {
+  .reference-picker { padding: 20px 16px; max-height: calc(100dvh - 24px); }
+  .reference-picker-heading h2 { font-size: 20px; }
+  .reference-picker-footer { flex-wrap: wrap; }
+  .reference-picker-footer > div { width: 100%; justify-content: flex-end; }
+  .reference-filters .form-grid { grid-template-columns: 1fr; }
+  .reference-result { grid-template-columns: 20px minmax(0, 1fr); padding: 14px 8px; gap: 10px; }
+  .reference-publication { grid-column: 2; justify-self: start; }
+  .reference-picker .v-field kbd { display: none; }
+  .relation-item { flex-wrap: wrap; }
+  .relation-item-document { flex: 1 1 100%; }
+  .relation-item > .v-select { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.v-application, .v-overlay-container) .v-field--variant-outlined, .catalog-table tbody tr { transition: none; }
+}
