@@ -16,13 +16,12 @@
     "types": [
       "node"
     ],
-    "baseUrl": ".",
     "paths": {
       "@atlas/ui/*": [
-        "packages/ui/src/*"
+        "./packages/ui/src/*"
       ],
       "@atlas/schemas": [
-        "packages/schemas/src/index.ts"
+        "./packages/schemas/src/index.ts"
       ]
     },
     "noEmit": true,

@@ -5,46 +5,46 @@ import { api, canManage, changeProject, fail, notify, refreshWorkspace, state } 
 const loading = ref(false); const operationsLoading = ref(false); const operationsError = ref('')
 async function loadOperations() { if(!canManage.value)return;operationsLoading.value=true;operationsError.value='';try{operations.value=await api('/api/operations')}catch(error){operationsError.value=(error as Error).message}finally{operationsLoading.value=false} }
 const operations = ref<{disk:{free_bytes:number;total_bytes:number;low_space:boolean};release_count:number;search:{samples:number;p95_ms:number|null}} | null>(null);
-const config = ref<WorkspaceResponse | null>(null); const busy = ref(false); const error = ref('')
+const config = ref<WorkspaceResponse | null>(null); const busy = ref(false)
 const selected = ref(''); const newId = ref(''); const newName = ref(''); const moduleId = ref(''); const moduleName = ref('')
 const project = computed(() => config.value?.projects.find(p => p.id === selected.value))
 const documentTypeItems=types.map(value=>({title:typeLabels[value],value}))
 const activeTemplates=computed(()=>config.value?.templates.filter(item=>isActiveType(item.type))||[])
-async function load() {loading.value=true;error.value='';try{await refreshWorkspace();config.value = structuredClone(JSON.parse(JSON.stringify(state.workspace))); selected.value = state.project || config.value?.projects[0]?.id || ''}catch(failure){error.value=(failure as Error).message}finally{loading.value=false}}
+const conventionItems=computed(()=>state.documents.filter(doc=>doc.metadata.type==='reference').map(doc=>({id:doc.metadata.doc_id,title:`${doc.metadata.doc_id} · ${doc.metadata.title}`})))
+function prepareFunctionRules(){if(project.value)project.value.function_id_rules={enabled:false,convention_id:config.value?.function_convention_id||'REF-FUNCTION-ID-CONVENTION',groups:[],kinds:[]}}
+async function load() {loading.value=true;try{await refreshWorkspace();config.value = structuredClone(JSON.parse(JSON.stringify(state.workspace))); selected.value = state.project || config.value?.projects[0]?.id || ''}catch(failure){fail(failure)}finally{loading.value=false}}
 function addProject() {
   try {
     const item = projectSchema.parse({ id: newId.value, name: newName.value })
     if (config.value?.projects.some(p => p.id === item.id)) throw new Error('Project ID đã tồn tại.')
-    config.value?.projects.push(item); selected.value = item.id; newId.value = ''; newName.value = ''; error.value = ''
-  } catch { error.value = 'Nhập tên project và ID dạng chữ thường, số, dấu gạch nối; ID không được trùng.' }
+    config.value?.projects.push(item); selected.value = item.id; newId.value = ''; newName.value = '' } catch { notify('Nhập tên project và ID dạng chữ thường, số, dấu gạch nối; ID không được trùng.', 'warning') }
 }
 function addModule() {
-  if (!project.value || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(moduleId.value) || !moduleName.value.trim() || project.value.modules.some(m => m.id === moduleId.value)) { error.value = 'Module cần ID hợp lệ, không trùng và tên hiển thị.'; return }
-  project.value.modules.push({ id: moduleId.value, name: moduleName.value.trim() }); moduleId.value = ''; moduleName.value = ''; error.value = ''
-}
+  if (!project.value || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(moduleId.value) || !moduleName.value.trim() || project.value.modules.some(m => m.id === moduleId.value)) { notify('Module cần ID hợp lệ, không trùng và tên hiển thị.', 'warning'); return }
+  project.value.modules.push({ id: moduleId.value, name: moduleName.value.trim() }); moduleId.value = ''; moduleName.value = '' }
 function addTemplate() {
   config.value?.templates.push({ id: `mau-${Date.now().toString(36)}`, name: 'Mẫu tài liệu mới', type: 'reference', project_id: selected.value || undefined, version: 1, body: '# Tiêu đề\n\n## Nội dung\n\nĐiền nội dung đã được xác nhận tại đây.\n\n## Nguồn quyết định\n\nĐiền nội dung đã được xác nhận tại đây.\n' })
 }
 async function save() {
   if (!config.value || busy.value || loading.value) return
-  busy.value = true; error.value = ''
+  busy.value = true
   try {
     const { revision, ...value } = config.value
     config.value = await api<WorkspaceResponse>('/api/workspace', { method: 'PUT', body: JSON.stringify({ config: value, base_revision: revision }) })
     await refreshWorkspace(); if (selected.value) changeProject(selected.value)
     notify('Đã lưu cấu hình không gian làm việc.')
-  } catch (e) { error.value = (e as Error).message; fail(e) } finally { busy.value = false }
+  } catch (e) { fail(e) } finally { busy.value = false }
 }
 onMounted(() => {void load();void loadOperations()})
 </script>
 <template>
-  <header class="page-heading"><div><span class="eyebrow">Không gian làm việc</span><h1>Cấu hình tri thức</h1><p>Project, phân hệ và mẫu tài liệu của đội ngũ.</p></div><div class="studio-actions"><v-btn variant="text" :disabled="busy || loading" :loading="loading" @click="load">Tải lại</v-btn><v-btn v-if="canManage" color="primary" :loading="busy" :disabled="loading || busy" @click="save">Lưu cấu hình</v-btn></div></header>
-  <v-skeleton-loader v-if="loading && !config" type="heading, paragraph, article" aria-label="Đang tải cấu hình" /><v-progress-linear v-else-if="loading" indeterminate color="primary" /><v-progress-linear v-if="operationsLoading" indeterminate color="primary" /><v-alert v-if="operationsError" type="warning" variant="tonal">{{ operationsError }}<v-btn variant="text" @click="loadOperations">Thử lại thông tin vận hành</v-btn></v-alert><v-alert v-if="error" type="error" variant="tonal" class="mb-6">{{ error }}</v-alert>
+  <header class="page-heading"><div><span class="eyebrow">Không gian làm việc</span><h1>Cấu hình không gian</h1><p>Project, phân hệ và mẫu tài liệu của đội ngũ.</p></div><div class="studio-actions"><v-btn variant="text" :disabled="busy || loading" :loading="loading" @click="load">Tải lại</v-btn><v-btn v-if="canManage" color="primary" :loading="busy" :disabled="loading || busy" @click="save">Lưu cấu hình</v-btn></div></header>
+  <v-skeleton-loader v-if="loading && !config" type="heading, paragraph, article" aria-label="Đang tải cấu hình" /><v-progress-linear v-else-if="loading" indeterminate color="primary" /><v-progress-linear v-if="operationsLoading" indeterminate color="primary" /><v-alert v-if="operationsError" type="warning" variant="tonal">{{ operationsError }}<v-btn variant="text" @click="loadOperations">Thử lại thông tin vận hành</v-btn></v-alert>
   <v-alert v-if="!canManage" type="info" variant="tonal" class="mb-6">Admin quản lý cấu hình. Các project dùng chung quyền truy cập nội bộ; bộ chọn project là bộ lọc ngữ cảnh.</v-alert>
   <div v-if="config" class="settings-layout">
-    <section class="panel"><h2>Không gian và project</h2><v-text-field v-model="config.name" label="Tên không gian" :readonly="!canManage" class="mt-6" /><v-select v-model="selected" :items="config.projects" item-title="name" item-value="id" label="Project" />
+    <section class="panel"><h2>Không gian và project</h2><v-text-field v-model="config.name" label="Tên không gian" :readonly="!canManage" class="mt-6" /><v-select v-model="config.function_convention_id" :items="conventionItems" item-title="title" item-value="id" label="Tài liệu quy ước Function ID mặc định (Published)" :readonly="!canManage" clearable @click:clear="delete config.function_convention_id" /><v-select v-model="selected" :items="config.projects" item-title="name" item-value="id" label="Project" />
       <template v-if="project"><code>{{ project.id }}</code><v-text-field v-model="project.name" label="Tên hiển thị" :readonly="!canManage" class="mt-4" /><v-textarea v-model="project.description" label="Mô tả" rows="2" :readonly="!canManage" /><v-switch v-model="project.demo" label="Project chứa dữ liệu minh họa" color="primary" :disabled="!canManage" hide-details /><v-switch v-model="project.require_review" label="Yêu cầu người khác duyệt trước khi xuất bản" color="primary" :disabled="!canManage" hide-details /><p class="field-help mt-4">Bản nháp dùng chung cho nhóm biên tập. Project mới mặc định yêu cầu duyệt. Bản đã xuất bản vẫn phục vụ trong khi chỉnh sửa.</p>
-        <h3 class="mt-8 mb-4">Phân hệ</h3><div v-for="item in project.modules" :key="item.id" class="module-row"><code>{{ item.id }}</code><v-text-field v-model="item.name" label="Tên phân hệ" hide-details :readonly="!canManage" /></div><div v-if="canManage" class="form-grid mt-6"><v-text-field v-model="moduleId" label="ID phân hệ mới" placeholder="thanh-toan" /><v-text-field v-model="moduleName" label="Tên phân hệ mới" /><v-btn variant="tonal" color="primary" @click="addModule">Thêm phân hệ</v-btn></div>
+        <details class="function-code-settings"><summary>Function ID · Bảng mã được duyệt</summary><p class="field-help my-4">Chọn tài liệu quy ước Published và nhập đúng bảng mã đã được tổ chức duyệt. Không lấy mã từ các ví dụ. Lưu cấu hình xác nhận revision của tài liệu chuẩn.</p><v-btn v-if="!project.function_id_rules && canManage" variant="tonal" @click="prepareFunctionRules">Thiết lập bảng mã</v-btn><template v-if="project.function_id_rules"><v-select v-model="project.function_id_rules.convention_id" :items="conventionItems" item-title="title" item-value="id" label="Tài liệu nguồn quy ước" :readonly="!canManage" /><h4>Mã nhóm nghiệp vụ · 4 chữ in hoa</h4><div v-for="(entry,index) in project.function_id_rules.groups" :key="index" class="code-registry-row"><v-text-field v-model="entry.code" label="Mã nhóm AAAA" :readonly="!canManage" maxlength="4" /><v-text-field v-model="entry.name" label="Tên nhóm" :readonly="!canManage" /><v-btn v-if="canManage" icon="mdi-close" variant="text" aria-label="Gỡ mã nhóm" @click="project.function_id_rules.groups.splice(index,1)" /></div><v-btn v-if="canManage" variant="text" prepend-icon="mdi-plus" @click="project.function_id_rules.groups.push({code:'',name:''})">Thêm mã nhóm</v-btn><h4 class="mt-4">Mã loại màn hình / chức năng · 3 chữ in hoa</h4><div v-for="(entry,index) in project.function_id_rules.kinds" :key="index" class="code-registry-row"><v-text-field v-model="entry.code" label="Mã loại BBB" :readonly="!canManage" maxlength="3" /><v-text-field v-model="entry.name" label="Tên loại" :readonly="!canManage" /><v-btn v-if="canManage" icon="mdi-close" variant="text" aria-label="Gỡ mã loại" @click="project.function_id_rules.kinds.splice(index,1)" /></div><v-btn v-if="canManage" variant="text" prepend-icon="mdi-plus" @click="project.function_id_rules.kinds.push({code:'',name:''})">Thêm mã loại</v-btn><v-switch v-model="project.function_id_rules.enabled" :disabled="!canManage" label="Xác nhận bảng mã được duyệt và bật cấp Function ID" color="primary" /><p v-if="project.function_id_rules.convention_revision" class="field-help">Revision đã xác nhận: {{ project.function_id_rules.convention_revision.slice(0,12) }}</p></template></details><h3 class="mt-8 mb-4">Phân hệ</h3><div v-for="item in project.modules" :key="item.id" class="module-row"><code>{{ item.id }}</code><v-text-field v-model="item.name" label="Tên phân hệ" hide-details :readonly="!canManage" /></div><div v-if="canManage" class="form-grid mt-6"><v-text-field v-model="moduleId" label="ID phân hệ mới" placeholder="thanh-toan" /><v-text-field v-model="moduleName" label="Tên phân hệ mới" /><v-btn variant="tonal" color="primary" @click="addModule">Thêm phân hệ</v-btn></div>
       </template>
       <details v-if="canManage" class="settings-add"><summary>Tạo project mới</summary><v-text-field v-model="newId" label="Project ID" placeholder="san-pham-noi-bo" class="mt-4" /><v-text-field v-model="newName" label="Tên project" /><v-btn variant="tonal" color="primary" @click="addProject">Thêm project</v-btn><p class="field-help mt-4">Thêm ít nhất một phân hệ rồi lưu cấu hình để bắt đầu tạo tài liệu.</p></details>
     </section>

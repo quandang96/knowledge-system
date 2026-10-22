@@ -18,3 +18,5 @@ test-results/
 output/playwright/
 .agents
 tests
+docs
+.playwright-mcp

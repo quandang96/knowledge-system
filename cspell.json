@@ -1,0 +1,43 @@
+{
+  "version": "0.2",
+  "language": "en,vi",
+  "import": ["@cspell/dict-vi-vn/cspell-ext.json"],
+  "ignorePaths": ["node_modules", ".cache", "output", "pnpm-lock.yaml", "knowledge/staging", "**/.vitepress/cache", "**/.vitepress/dist"],
+  "words": [
+    "atlas",
+    "backlinks",
+    "bavail",
+    "colour",
+    "Dify",
+    "fastify",
+    "fflate",
+    "hardbreak",
+    "khóa",
+    "linkify",
+    "materialdesignicons",
+    "Meiryo",
+    "mermaid",
+    "normalise",
+    "nosniff",
+    "Noto",
+    "nums",
+    "pannable",
+    "pnpm",
+    "softbreak",
+    "statfs",
+    "thỏa",
+    "tiptap",
+    "topbar",
+    "ufffc",
+    "unpublishing",
+    "vitepress",
+    "vuetify",
+    "zoomable"
+  ],
+  "overrides": [
+    {
+      "filename": "tests/**",
+      "words": ["DETA", "Fetc", "impossibleword", "xhello"]
+    }
+  ]
+}

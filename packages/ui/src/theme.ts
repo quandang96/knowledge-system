@@ -9,37 +9,43 @@ export const atlasColors = {
   background: '#FAFCFF',
   'on-background': '#203047',
   surface: '#ffffff',
-  'on-surface': '#203047',
+  'on-surface': '#24344C',
   'surface-variant': '#F1F7FF',
   'on-surface-variant': '#4C617B',
-  'text-secondary': '#4C617B',
+  'text-secondary': '#455E79',
   'text-muted': '#5D7187',
-  outline: '#D8E4F0',
+  outline: '#D5E3F2',
   'outline-subtle': '#E6EFF8',
   'outline-strong': '#9CB4CD',
-  'primary-soft': '#E7F1FF',
-  'primary-hover': '#075BC2',
+  'primary-soft': '#EAF4FF',
+  'primary-hover': '#075BC4',
   'primary-pressed': '#064DA8',
   'focus-ring': '#CFE5FF',
   'control-outline': '#7D91A6',
   'control-outline-hover': '#526F8D',
-  'input-line': '#8195AA',
-  'input-line-hover': '#536F8B',
+  'input-line': '#7D91A6',
+  'input-line-hover': '#526F8D',
   'control-disabled': '#F3F6FB',
   'control-disabled-outline': '#C2D0DF',
   'text-disabled': '#67788C',
   // Accessible foreground over disabled surfaces; the V3 base token stays available.
   'on-disabled': '#596F88',
-  icon: '#476581',
+  icon: '#426582',
+  screen: '#0B7991',
+  'screen-soft': '#E7F8FB',
+  function: '#7453B6',
+  'function-soft': '#F2EBFF',
+  rule: '#B85D21',
+  'rule-soft': '#FFF1E5',
   'row-hover': '#F2F8FF',
   'row-selected': '#E7F1FF',
-  success: '#137D52',
+  success: '#16814C',
   'on-success': '#ffffff',
-  'success-soft': '#E8F7EF',
-  warning: '#A26107',
+  'success-soft': '#E9F9F0',
+  warning: '#9B5A08',
   'on-warning': '#ffffff',
   'warning-soft': '#FFF5DF',
-  error: '#BF3546',
+  error: '#BF2446',
   'on-error': '#ffffff',
   'error-soft': '#FFF0F2',
   info: '#0B7991',
@@ -63,8 +69,8 @@ export const atlasTheme = {
     'high-emphasis-opacity': 1,
     'border-color': atlasColors.outline,
     'border-opacity': 1,
-    'hover-opacity': .06,
-    'focus-opacity': .1
+    'hover-opacity': 0.06,
+    'focus-opacity': 0.1
   }
 }
 
@@ -77,7 +83,13 @@ export const atlasDefaults = {
   VAutocomplete: { ...fieldDefaults },
   VChip: { size: 'small', rounded: 'lg' }
 }
-export const reviewColors = { draft: 'info', in_review: 'warning', changes_requested: 'error', approved: 'success' } as const
+export const reviewColors = {
+  draft: 'info',
+  in_review: 'warning',
+  changes_requested: 'error',
+  approved: 'success'
+} as const
 // Shared semantic mapping; MDI remains the existing icon library.
-export const typeIconGroups: Record<string, string> = { overview:'primary', 'business-flow':'diagram', module:'primary', screen:'media', function:'primary', role:'warning', permission:'warning', 'business-rule':'warning', reference:'info' }
+import { typeIconGroups } from '../../schemas/src/document-types'
+export { typeIconGroups }
 export const iconGroup = (type: string) => typeIconGroups[type] || 'utility'

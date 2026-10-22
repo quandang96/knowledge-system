@@ -1,8 +1,12 @@
 import { atlasColors } from '../packages/ui/src/theme.ts'
 
 function luminance(hex: string) {
-  const parts = hex.replace('#', '').match(/../g)!.map(value => parseInt(value, 16) / 255).map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4)
-  return parts[0] * .2126 + parts[1] * .7152 + parts[2] * .0722
+  const parts = hex
+    .replace('#', '')
+    .match(/../g)!
+    .map((value) => parseInt(value, 16) / 255)
+    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+  return parts[0] * 0.2126 + parts[1] * 0.7152 + parts[2] * 0.0722
 }
 const pairs = [
   ['body', atlasColors['on-surface'], atlasColors.surface, 4.5],
@@ -29,6 +33,9 @@ const pairs = [
   ['media icon', atlasColors.media, atlasColors['media-soft'], 3],
   ['table row', atlasColors['on-surface'], atlasColors['row-hover'], 4.5],
   ['icon', atlasColors.icon, atlasColors.surface, 3],
+  ['screen icon', atlasColors.screen, atlasColors['screen-soft'], 3],
+  ['function icon', atlasColors.function, atlasColors['function-soft'], 3],
+  ['rule icon', atlasColors.rule, atlasColors['rule-soft'], 3],
   ['field border', atlasColors['control-outline'], atlasColors.surface, 3],
   ['field border on canvas', atlasColors['control-outline'], atlasColors.background, 3],
   ['field hover', atlasColors['control-outline-hover'], atlasColors.surface, 3],
@@ -36,8 +43,9 @@ const pairs = [
 ] as const
 let failed = false
 for (const [role, foreground, background, minimum] of pairs) {
-  const fg = luminance(foreground); const bg = luminance(background)
-  const contrast = (Math.max(fg, bg) + .05) / (Math.min(fg, bg) + .05)
+  const fg = luminance(foreground)
+  const bg = luminance(background)
+  const contrast = (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
   console.log(`${role}: ${contrast.toFixed(2)}:1 (min ${minimum}) ${contrast >= minimum ? 'PASS' : 'FAIL'}`)
   if (contrast < minimum) failed = true
 }

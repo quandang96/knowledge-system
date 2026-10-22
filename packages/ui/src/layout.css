@@ -42,6 +42,10 @@
 .nav-link { padding-block: 8px; border-inline-start: 3px solid transparent; }
 .nav-link.active { border-inline-start-color: var(--primary); }
 .catalog-toolbar .v-field { border-radius: 0; }
+.catalog-content { position: relative; min-height: 360px; }
+.catalog-loading { min-height: 360px; }
+.catalog-content > .catalog-progress { position: absolute; inset: 0 0 auto; z-index: 1; }
+.document-loading { min-height: 400px; }
 .catalog-toolbar > .v-input { min-width: 140px; }
 .project-switch .v-field { border-radius: 0; }
 .project-switch .v-select__selection { font-size: 14px; }

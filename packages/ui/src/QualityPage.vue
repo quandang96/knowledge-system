@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { relationLabels, type QualityReport, type FeedbackItem } from '../../schemas/src/index'
-import { api, currentProject, state } from './state'
+import { api, currentProject, fail, notify, state } from './state'
 const feedback = ref<FeedbackItem[]>([]); const report = ref<QualityReport | null>(null); const busy = ref(false); const error = ref(''); const tab = ref('matrix')
 const items = computed(() => tab.value === 'overdue' ? report.value?.overdue : report.value?.orphans)
 let sequence = 0
@@ -10,7 +10,7 @@ async function load() {
   try { const [data, comments] = await Promise.all([api<QualityReport>(`/api/quality?project_id=${encodeURIComponent(state.project)}`),api<FeedbackItem[]>(`/api/feedback?project_id=${encodeURIComponent(state.project)}`)]); if (request === sequence) {report.value = data;feedback.value=comments} }
   catch (e) { if (request === sequence) error.value = (e as Error).message } finally { if (request === sequence) busy.value = false }
 }
-async function resolve(id:string) { try {await api(`/api/feedback/${id}/resolve`,{method:'POST'});await load()} catch(e) {error.value=(e as Error).message} }
+async function resolve(id:string) { try {await api(`/api/feedback/${id}/resolve`,{method:'POST'});notify('Đã đánh dấu góp ý là đã xử lý.');await load()} catch(e) {fail(e)} }
 onMounted(load); watch(() => state.project, load)
 </script>
 <template>

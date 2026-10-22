@@ -1,0 +1,159 @@
+/* Navigation shell, loading feedback and the shared create dialog. Loaded last so it settles
+   the sidebar rules spread across styles/workspace/layout/business.css. */
+
+/* The page width must not shift when a long screen adds a scrollbar. */
+html { scrollbar-gutter: stable; }
+
+/* Footer stays at the bottom while a screen loads instead of jumping up under an empty area. */
+.main-content { display: flex; flex-direction: column; }
+.view-area { flex: 1 0 auto; }
+
+/* Thin progress bar for screen changes; appears only when loading takes longer than a moment. */
+.route-progress { position: fixed; inset: 0 0 auto; height: 3px; z-index: 2000; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
+.route-progress.visible { opacity: 1; }
+.route-progress > span { display: block; height: 100%; width: 40%; background: var(--primary); border-radius: 0 3px 3px 0; animation: route-progress 1.1s ease-in-out infinite; }
+@keyframes route-progress { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+
+/* Skeletons: the theme sets border-opacity to 1, which made Vuetify bones solid navy blocks. */
+.v-skeleton-loader { background: transparent; }
+.v-skeleton-loader :is(.v-skeleton-loader__avatar, .v-skeleton-loader__button, .v-skeleton-loader__chip, .v-skeleton-loader__divider, .v-skeleton-loader__heading, .v-skeleton-loader__image, .v-skeleton-loader__ossein, .v-skeleton-loader__text) { background: rgba(var(--v-theme-on-surface), .07); }
+.view-skeleton { display: grid; gap: 14px; padding-block: 4px 24px; }
+.skeleton-bone { position: relative; overflow: hidden; border-radius: 8px; background: rgba(var(--v-theme-on-surface), .07); }
+.skeleton-bone::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent); animation: skeleton-shimmer 1.4s ease-in-out infinite; }
+.skeleton-eyebrow { width: 120px; height: 12px; }
+.skeleton-title { width: min(420px, 70%); height: 30px; }
+.skeleton-line { width: min(640px, 90%); height: 14px; }
+.skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+.skeleton-card { height: 150px; border-radius: 12px; }
+@keyframes skeleton-shimmer { to { transform: translateX(100%); } }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Sidebar: create action, then Tra cứu / Biên tập / Quản lý sections, all open. Sized so every item
+   fits a 900px-high window without scrolling. */
+.atlas-sidebar .brand { padding: 20px 22px 14px; }
+.atlas-sidebar .project-switch { padding: 4px 17px 12px; }
+.atlas-sidebar .project-switch .eyebrow { margin-bottom: 6px; }
+.sidebar-create { padding: 0 16px 10px; }
+.sidebar-create .v-btn { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.atlas-sidebar nav { padding: 0 10px 4px; }
+.nav-section { display: block; padding: 8px 12px 4px; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-secondary); }
+.atlas-sidebar .nav-link { min-height: 38px; padding: 4px 10px; margin: 1px 0; gap: 12px; font-size: 14px; border-inline-start-width: 0; }
+.atlas-sidebar .nav-link.active { box-shadow: inset 3px 0 var(--primary); }
+.atlas-sidebar .nav-link > span:not(.nav-icon) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-footer { padding: 6px 10px 10px; }
+.sidebar-footer .nav-link { margin: 0; }
+
+/* Coloured icon tiles (menu, quick links, related documents). The icon sits inside a fixed tile
+   because Vuetify writes the icon's own size inline. Each colour stays put when an item is active. */
+:is(.nav-icon, .icon-tile) { display: inline-grid; place-items: center; flex: 0 0 auto; border-radius: 8px; color: var(--icon); background: var(--surface-muted); }
+.nav-icon { width: 30px; height: 30px; }
+/* The older `.nav-link > span:first-of-type { flex: 1 }` rule would stretch the tile. */
+.atlas-sidebar .nav-link > .nav-icon { flex: 0 0 30px; }
+.icon-tile { width: 36px; height: 36px; }
+:is(.nav-icon, .icon-tile) .v-icon, .nav-link.active :is(.nav-icon, .icon-tile) .v-icon { color: inherit; }
+:is(.nav-icon, .icon-tile).semantic-primary { color: var(--primary); background: var(--primary-soft); }
+:is(.nav-icon, .icon-tile).semantic-screen { color: var(--screen); background: var(--screen-soft); }
+:is(.nav-icon, .icon-tile).semantic-function { color: var(--function); background: var(--function-soft); }
+:is(.nav-icon, .icon-tile).semantic-rule { color: var(--rule); background: var(--rule-soft); }
+:is(.nav-icon, .icon-tile).semantic-info { color: var(--info); background: var(--info-soft); }
+:is(.nav-icon, .icon-tile).semantic-media { color: var(--media-color); background: var(--media-soft); }
+:is(.nav-icon, .icon-tile).semantic-success { color: var(--success); background: var(--success-soft); }
+:is(.nav-icon, .icon-tile).semantic-warning { color: var(--warning); background: var(--warning-soft); }
+:is(.nav-icon, .icon-tile).semantic-diagram { color: var(--diagram-color); background: var(--diagram-soft); }
+.quick-link > .icon-tile + span { flex: 1; }
+
+/* Fields: underlined inputs take the colour of whatever they sit on (cards, tinted rows, dialogs)
+   instead of painting a white box over tinted surfaces. */
+:is(.v-application, .v-overlay-container) .v-field--variant-underlined,
+.catalog-toolbar .v-field { background: transparent; }
+
+/* Document page: tables hug their content (the border used to run past the last column), and the
+   table of contents does not stack a second rule under the header or above the first heading. */
+.document-body table { width: max-content; max-width: 100%; }
+.document-header + .mobile-toc { border-top: 0; margin-top: 0; padding-top: 0; }
+.mobile-toc + .document-body > h2:first-child { border-top: 0; padding-top: 0; margin-top: 8px; }
+.related-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.related-card strong { font-size: 14px; color: var(--text-primary); }
+
+/* Toolbars and headings line up on one baseline. */
+.diagram-toolbar { align-items: center; }
+.diagram-toolbar .diagram-node-type { flex: 0 0 180px; }
+.convention-panel { border: 1px solid var(--border); border-radius: 12px; }
+.section-heading .v-switch .v-label { font-size: 14px; }
+/* Lists inside a panel: no rule above the first row, which read as a second frame. */
+.panel > .quality-doc:first-child { border-top: 0; }
+
+/* Shared create dialog. */
+.create-dialog { border-radius: 12px !important; }
+.create-dialog .new-doc-form { padding: 28px 30px 24px; }
+.create-dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.create-dialog-heading h2 { margin-top: 4px; }
+.new-doc-form .full-width { grid-column: 1 / -1; }
+.advanced-toggle { display: inline-flex; align-items: center; gap: 4px; margin: 4px 0 12px; padding: 4px 2px; font: inherit; font-size: 14px; color: var(--primary); background: none; border: 0; cursor: pointer; border-radius: 6px; }
+.advanced-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.create-dialog .form-actions { margin-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .route-progress > span, .skeleton-bone::after { animation: none; }
+}
+
+/* Related documents: one group per type, laid out side by side instead of a single narrow column. */
+.related-section { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 16px; align-items: start; }
+.related-section > :not(.related-type-group) { grid-column: 1 / -1; }
+.related-type-group .related-grid { grid-template-columns: 1fr; }
+.convention-panel > .section-heading { margin-top: 0; }
+.settings-layout .panel > h2 { font-size: 18px; margin-bottom: 18px; }
+
+/* Narrow screens: data tables scroll sideways instead of squeezing a column to one word per line,
+   and the Studio header puts the document ID on its own line before the actions. */
+.catalog-table table { min-width: 640px; }
+@media (max-width: 760px) {
+  .editor-panel > .section-heading { flex-wrap: wrap; }
+  .editor-panel > .section-heading > span:first-child { flex: 1 1 100%; white-space: nowrap; }
+}
+:is(.nav-icon, .icon-tile).semantic-error { color: var(--error); background: var(--error-soft); }
+
+/* Shared notice / confirmation dialog. */
+.app-dialog { border-radius: 12px !important; padding: 26px 26px 20px; }
+.app-dialog-body { display: flex; gap: 16px; align-items: flex-start; }
+.app-dialog-body h2 { font-size: 18px; margin: 4px 0 8px; }
+.app-dialog-body p { color: var(--text-secondary); white-space: pre-line; overflow-wrap: anywhere; }
+.app-dialog .form-actions { margin-top: 22px; }
+
+/* Inline @ suggestions under the caret (rich editor and Markdown Source). */
+.mention-menu { position: fixed; z-index: 2400; max-height: 340px; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(20, 40, 70, .16); overflow: hidden; }
+.mention-menu-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+.mention-menu ul { list-style: none; margin: 0; padding: 4px; overflow-y: auto; }
+.mention-menu li { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.mention-menu li[aria-selected="true"] { background: var(--primary-soft); }
+.mention-menu .icon-tile { width: 28px; height: 28px; }
+.mention-text { display: grid; min-width: 0; line-height: 1.35; }
+.mention-text code { font-size: 12px; color: var(--primary); background: none; padding: 0; }
+.mention-text strong { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mention-text small { font-size: 12px; color: var(--text-secondary); }
+.mention-empty { margin: 0; padding: 14px 12px; font-size: 14px; color: var(--text-secondary); }
+.mention-menu-foot { padding: 6px 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--border); background: var(--surface-muted); }
+
+/* Studio relation editors: typed fields stack as one band; "Liên kết khác" keeps the panel gutter. */
+.typed-relation-editor { padding: 18px 24px; }
+.typed-relation-editor + .typed-relation-editor { border-top: 0; padding-top: 4px; }
+.typed-relation-editor .section-heading { margin: 0 0 8px; }
+.typed-relation-editor .relation-warning { display: flex; align-items: center; gap: 4px; margin-top: 2px; font-size: 12px; color: var(--warning); }
+.editor-panel > .relation-editor { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.editor-panel > .relation-editor .section-heading { margin-top: 0; }
+
+/* Old gallery: a compact strip with one action to move the images into the content. */
+.gallery-legacy { padding: 18px 24px; border-top: 1px solid var(--border); background: var(--warning-soft); }
+.gallery-legacy .section-heading { margin: 0 0 12px; align-items: flex-start; }
+.gallery-legacy-thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.gallery-legacy-thumbs img { width: 120px; height: 76px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); }
+
+/* Number of checklist items still missing, on the "Gửi duyệt" button. */
+.checklist-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 700; color: #fff; background: var(--warning); }
+.typed-relation-editor:has(+ .typed-relation-editor) { border-bottom: 0; padding-bottom: 8px; }
+
+/* Upload placeholder: its own line that never takes the caret. As an inline box at the end of a
+   paragraph, End could put the caret after it and text typed during the upload was dropped. */
+.image-upload-placeholder { display: flex; pointer-events: none; user-select: none; }
+.mention-menu-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mention-menu-foot .text-link { padding: 0; font: inherit; font-size: 12px; font-weight: 600; background: none; border: 0; cursor: pointer; }

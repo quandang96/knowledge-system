@@ -20,13 +20,18 @@
     "test": "vitest run",
     "test:e2e": "tsx tests/e2e/publish-smoke.ts",
     "typecheck": "vue-tsc --noEmit",
+    "format": "prettier --write \"{apps,packages,scripts,tests}/**/*.ts\"",
+    "format:check": "prettier --check \"{apps,packages,scripts,tests}/**/*.ts\"",
     "lint": "eslint apps packages scripts tests knowledge/published/.vitepress",
     "validate": "tsx scripts/validate-knowledge.ts",
     "backup": "tsx scripts/backup-knowledge.ts",
     "benchmark:search": "tsx scripts/benchmark-search.ts",
     "inventory:v21": "tsx scripts/inventory-v21.ts",
+    "prepare:v4": "tsx scripts/prepare-v4.ts",
+    "migrate": "tsx scripts/migrate.ts",
     "storage:retention": "tsx scripts/retention.ts",
     "test:browser:fixture": "tsx tests/e2e/browser-fixture.ts",
+    "test:browser:v4": "tsx scripts/browser-v4-fixture.ts",
     "check:theme": "node --experimental-strip-types scripts/check-theme.ts"
   },
   "dependencies": {
@@ -59,6 +64,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@cspell/dict-vi-vn": "3.0.6",
     "@eslint/js": "^9.39.0",
     "@types/js-yaml": "^4.0.9",
     "@types/markdown-it": "^14.1.2",
@@ -66,6 +72,7 @@
     "eslint": "^9.39.0",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^16.4.0",
+    "prettier": "3.6.2",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.1",
