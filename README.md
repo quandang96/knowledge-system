@@ -1,6 +1,6 @@
 # Atlas Business Knowledge Hub
 
-Knowledge portal nội bộ bằng **Vue 3 + Vuetify 3 + VitePress + TypeScript**, dựa trên [đặc tả](docs/ATLAS_KNOWLEDGE_HUB_VIBE_CODING_SPEC.md). Giao diện mặc định tiếng Việt. Vuetify thay lớp Tailwind trong tài liệu theo yêu cầu của project.
+Knowledge portal nội bộ bằng **Vue 3 + Vuetify 3 + VitePress + TypeScript**, dựa trên đặc tả nội bộ (`docs/ATLAS_KNOWLEDGE_HUB_VIBE_CODING_SPEC.md`, không đưa lên git). Giao diện mặc định tiếng Việt. Vuetify thay lớp Tailwind trong tài liệu theo yêu cầu của project.
 
 Markdown, JSON và ảnh trên filesystem là nguồn dữ liệu chính. Không có database, localStorage document store, Docker hoặc AI backend.
 

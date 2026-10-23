@@ -4,11 +4,6 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.28.2",
-  "workspaces": [
-    "apps/api",
-    "packages/ui",
-    "packages/schemas"
-  ],
   "scripts": {
     "dev": "tsx scripts/dev.ts",
     "dev:api": "tsx watch apps/api/src/server.ts",
@@ -26,12 +21,10 @@
     "validate": "tsx scripts/validate-knowledge.ts",
     "backup": "tsx scripts/backup-knowledge.ts",
     "benchmark:search": "tsx scripts/benchmark-search.ts",
-    "inventory:v21": "tsx scripts/inventory-v21.ts",
-    "prepare:v4": "tsx scripts/prepare-v4.ts",
     "migrate": "tsx scripts/migrate.ts",
     "storage:retention": "tsx scripts/retention.ts",
     "test:browser:fixture": "tsx tests/e2e/browser-fixture.ts",
-    "test:browser:v4": "tsx scripts/browser-v4-fixture.ts",
+    "test:browser:v4": "tsx tests/e2e/browser-v4-fixture.ts",
     "check:theme": "node --experimental-strip-types scripts/check-theme.ts"
   },
   "dependencies": {

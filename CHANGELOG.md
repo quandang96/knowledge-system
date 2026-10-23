@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-23 — Dọn repo: ignore test/docs/playwright, xóa script chết
+
+- `.gitignore`: untrack các file test/docs còn sót (`tests/api.test.ts`, `tests/markdown.test.ts`, `tests/e2e/publish-smoke.ts`, `docs/ATLAS_KNOWLEDGE_HUB_VIBE_CODING_SPEC.md`); giữ nguyên trên đĩa, chỉ bỏ khỏi git. `output/` ignore toàn bộ (trước chỉ `output/playwright/`).
+- Chuyển 5 file liên quan Playwright ra khỏi `scripts/` vào `tests/e2e/` (đã ignore): `browser-v4-fixture.ts`, `check-navigation-browser.js`, `check-v4-browser.js`, `check-v4-media-errors-browser.js`, `check-v4-publish-browser.js`.
+- Xóa script một lần đã hoàn tất và không còn gì đọc output của chúng: `generate-sidebar.ts`, `rebuild-knowledge-index.ts`, `inventory-v21.ts` (+ `output/v21-inventory*.json`), `prepare-v4.ts`. Bỏ `inventory:v21` và `prepare:v4` khỏi `package.json`.
+
 ## 2026-10-22 — Hoàn thiện gợi ý @
 
 - `@` mở gợi ý cả sau dấu câu (`(@`, `“@`, `[@`), không chỉ sau dấu cách; vẫn không mở khi dính liền sau chữ/số (email).

@@ -15,7 +15,7 @@ knowledge/.knowledge-state/
 **/.vitepress/dist/
 test-results/
 .playwright-cli/
-output/playwright/
+output/
 .agents
 tests
 docs
