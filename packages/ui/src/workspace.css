@@ -135,10 +135,21 @@ kbd { font-family: inherit; font-size: 12px; }
 .quick-link small { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
 .attention-row { display: flex; justify-content: space-between; gap: 15px; padding: 13px 0; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); }
 .attention-row strong { font-size: 16px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.catalog-toolbar { flex-wrap: wrap; }
+/* Search and filter bars sit on their own surface so they read as separate from the content below. */
+.filter-panel { padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.catalog-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.catalog-toolbar > .v-input { min-width: 140px; }
 .catalog-toolbar > .v-text-field { flex: 2 1 250px; }
 .catalog-toolbar > .v-select { flex: 1 1 160px; }
-.catalog-results-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 22px 0; }
+/* Catalog filters: one row of equal-width fields (search gets 2.5x width); the container query stacks them as search + two columns. */
+.catalog-filters { container-type: inline-size; }
+.catalog-toolbar.filter-grid { display: grid; grid-template-columns: minmax(0, 2.5fr) repeat(var(--filters, 2), minmax(0, 1fr)); gap: 16px 20px; align-items: start; }
+.catalog-toolbar.filter-grid > * { min-width: 0; }
+@container (max-width: 960px) {
+  .catalog-toolbar.filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .catalog-toolbar.filter-grid > .catalog-search { grid-column: 1 / -1; }
+}
+.catalog-results-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 24px 0; }
 .catalog-results-bar p { color: var(--text-secondary); font-size: 13px; }
 .catalog-results-bar .status-dot { margin-left: 12px; }
 .catalog-results-bar > div { display: flex; gap: 12px; align-items: center; }

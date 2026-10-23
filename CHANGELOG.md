@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-23 — Hướng dẫn sử dụng từng bước, có ảnh minh họa
+
+- Viết lại trang **Hướng dẫn sử dụng** theo giao diện hiện tại: 21 mục, mỗi mục có **Công dụng**, các bước đánh số và 29 ảnh chụp thật có khung đỏ đánh dấu chỗ cần bấm. Mục lục bấm được; ảnh tải lười nhưng giữ sẵn kích thước nên nhảy mục không bị lệch; bấm ảnh để xem cỡ lớn.
+- Hướng dẫn và ảnh chuyển vào `packages/ui/src/help/` (được track). Trước đây trang import `docs/HUONG_DAN_SU_DUNG.md` vốn bị ignore, nên bản clone mới build lỗi.
+- Ảnh được tạo bằng Playwright trên fixture tạm (`tests/e2e/help-screenshots.ts`, chạy cùng `npm run test:browser:fixture`), lưu WebP (~1,3 MB tổng).
+- Sửa ô nhập trong hộp **Góp ý nội dung** chỉ rộng ~200px: các ô nhập con trực tiếp của `.new-doc-form` giờ chiếm trọn bề ngang.
+- Sửa hướng dẫn cũ ghi sai: từ khóa sau `@` không được có dấu cách (`@phe`, không phải `@phe duyet`); thanh bên dùng nhóm **Quản lý**, không còn "Nâng cao (thu gọn)".
+
+## 2026-10-23 — Bộ lọc hiển thị đầy đủ, gọn và cân đối
+
+- Thư viện và Màn hình nghiệp vụ: bỏ phần thu gọn "Bộ lọc khác"; Tìm kiếm, Project, Phân hệ, Nhãn, Vai trò nằm chung một thanh, các ô rộng bằng nhau (ô tìm kiếm gấp đôi). Khi nội dung hẹp, thanh tự xếp thành ô tìm kiếm một hàng và các bộ lọc chia hai cột. Nhãn và Vai trò có nhãn chữ như các ô còn lại.
+- Bộ chọn tài liệu liên kết: bỏ phần thu gọn "Bộ lọc nâng cao"; Project, Phân hệ, Loại tài liệu hiện sẵn trên một hàng (mobile: Project một hàng, hai ô còn lại chia đôi).
+- Gộp các luật CSS `.catalog-toolbar` bị lặp ở 4 file và bỏ `.catalog-advanced`; Sơ đồ nâng cao vẫn dùng bố cục cũ.
+- Thanh tìm kiếm/lọc của Thư viện, Màn hình nghiệp vụ, Function ID, Duyệt và xuất bản, Sơ đồ nâng cao nằm trong khay `filter-panel` (nền, viền, bo góc như `.panel`) và cách nội dung bên dưới 24–28px, để không còn dính sát phần nội dung.
+
 ## 2026-10-23 — Dọn repo: ignore test/docs/playwright, xóa script chết
 
 - `.gitignore`: untrack các file test/docs còn sót (`tests/api.test.ts`, `tests/markdown.test.ts`, `tests/e2e/publish-smoke.ts`, `docs/ATLAS_KNOWLEDGE_HUB_VIBE_CODING_SPEC.md`); giữ nguyên trên đĩa, chỉ bỏ khỏi git. `output/` ignore toàn bộ (trước chỉ `output/playwright/`).

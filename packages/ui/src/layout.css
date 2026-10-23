@@ -28,8 +28,9 @@
 .settings-add > :is(.v-text-field, .v-select),
 .settings-layout .form-grid > :is(.v-text-field, .v-select),
 .diagram-inspector > :is(.v-text-field, .v-select, .v-textarea) { margin-bottom: 8px; }
+/* Vuetify lays a dialog's <form> out as a flex box; without this a lone textarea shrinks to its 20-column default. */
+.new-doc-form > :is(.v-text-field, .v-select, .v-textarea, .v-autocomplete) { width: 100%; }
 .module-row { margin-block: 20px; }
-.reference-filters .form-grid { row-gap: 16px; column-gap: 24px; }
 .semantic-icon { color: var(--icon); }
 .semantic-icon.semantic-primary { color: var(--primary); background: var(--primary-soft); }
 .semantic-icon.semantic-info { color: var(--info); background: var(--info-soft); }
@@ -46,7 +47,6 @@
 .catalog-loading { min-height: 360px; }
 .catalog-content > .catalog-progress { position: absolute; inset: 0 0 auto; z-index: 1; }
 .document-loading { min-height: 400px; }
-.catalog-toolbar > .v-input { min-width: 140px; }
 .project-switch .v-field { border-radius: 0; }
 .project-switch .v-select__selection { font-size: 14px; }
 .flow-node { width: 210px; min-width: 0; min-height: 84px; padding: 16px; border-radius: 12px; border-color: var(--primary); background: var(--primary-soft); box-shadow: none; }
@@ -71,3 +71,8 @@
   .editor-metadata > .v-input:first-child { grid-column: auto; }
   .document-actions .v-btn { max-width: 100%; }
 }
+/* User guide: screenshots sit in the reading column and open full size in a new tab. */
+.help-guide .guide-image-link { display: block; margin: 16px 0 28px; }
+.help-guide .guide-image { display: block; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 1px 3px rgb(15 23 42 / 8%); }
+.help-guide .guide-image-link:hover .guide-image { border-color: var(--primary); }
+.help-guide :is(h2, h3) { scroll-margin-top: 95px; }

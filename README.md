@@ -4,7 +4,7 @@ Knowledge portal nội bộ bằng **Vue 3 + Vuetify 3 + VitePress + TypeScript*
 
 Markdown, JSON và ảnh trên filesystem là nguồn dữ liệu chính. Không có database, localStorage document store, Docker hoặc AI backend.
 
-**Tài liệu:** [Hướng dẫn sử dụng](docs/HUONG_DAN_SU_DUNG.md) · [Chức năng đã triển khai](docs/CHUC_NANG_DA_TRIEN_KHAI.md) · [Vận hành, backup và kiểm tra](docs/VAN_HANH.md).
+**Tài liệu:** [Hướng dẫn sử dụng](packages/ui/src/help/HUONG_DAN_SU_DUNG.md) (cũng là trang **Hướng dẫn sử dụng** trong app). Tài liệu nội bộ `docs/CHUC_NANG_DA_TRIEN_KHAI.md` và `docs/VAN_HANH.md` không đưa lên git.
 
 ## Chạy local
 
