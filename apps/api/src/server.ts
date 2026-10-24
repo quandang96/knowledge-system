@@ -66,6 +66,7 @@ export async function createServer(options: ServerOptions = {}) {
         proxySecret: process.env.PROXY_SHARED_SECRET,
         allowedOrigin: process.env.ALLOWED_ORIGIN,
         secureCookie: process.env.COOKIE_SECURE === 'true',
+        tunnelHttpsOrigin: process.env.TUNNEL_HTTPS_ORIGIN === 'true',
         passwords: {
           admin: { password: process.env.LOCAL_ADMIN_PASSWORD || 'atlas-demo-2026', role: 'Admin' },
           editor: { password: process.env.LOCAL_EDITOR_PASSWORD || 'atlas-editor-2026', role: 'Editor' },

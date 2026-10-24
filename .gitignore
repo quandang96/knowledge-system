@@ -18,6 +18,9 @@ test-results/
 output/
 .agents
 tests
+!tests/
+tests/*
+!tests/tunnel-auth.test.ts
 docs
 plans
 .playwright-mcp

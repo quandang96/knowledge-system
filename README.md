@@ -2,7 +2,7 @@
 
 Knowledge portal nội bộ bằng **Vue 3 + Vuetify 3 + VitePress + TypeScript**, dựa trên đặc tả nội bộ (`docs/ATLAS_KNOWLEDGE_HUB_VIBE_CODING_SPEC.md`, không đưa lên git). Giao diện mặc định tiếng Việt. Vuetify thay lớp Tailwind trong tài liệu theo yêu cầu của project.
 
-Markdown, JSON và ảnh trên filesystem là nguồn dữ liệu chính. Không có database, localStorage document store, Docker hoặc AI backend.
+Markdown, JSON và ảnh trên filesystem là nguồn dữ liệu chính. Không có database, localStorage document store hoặc AI backend.
 
 **Tài liệu:** [Hướng dẫn sử dụng](packages/ui/src/help/HUONG_DAN_SU_DUNG.md) (cũng là trang **Hướng dẫn sử dụng** trong app). Tài liệu nội bộ `docs/CHUC_NANG_DA_TRIEN_KHAI.md` và `docs/VAN_HANH.md` không đưa lên git.
 
@@ -39,6 +39,21 @@ pnpm start
 ```
 
 Mở **http://127.0.0.1:3001**. Trang `/login` không chứa nội dung business. Không phục vụ riêng `.vitepress/dist` bằng một public static server.
+
+## Chia sẻ tạm thời qua Docker và Cloudflare
+
+Cần Docker Desktop đang chạy. Copy `docker.env.example` thành `.env.docker`, rồi điền email được phép truy cập và bốn mật khẩu riêng, đủ mạnh. `CLOUDFLARE_ALLOWED_EMAILS` nhận một email hoặc nhiều email ngăn cách bằng dấu phẩy. Không dùng lại mật khẩu demo trong `.env.example`.
+
+```powershell
+Copy-Item docker.env.example .env.docker
+# Sửa .env.docker trước khi chạy
+docker compose --env-file .env.docker up -d --build
+docker compose --env-file .env.docker logs -f cloudflared
+```
+
+Lấy URL `https://...trycloudflare.com` trong log và gửi cho các email đã khai báo. Người nhận xác thực email bằng mã một lần của Cloudflare, sau đó đăng nhập app bằng tài khoản `admin`, `editor`, `publisher` hoặc `reader` và mật khẩu tương ứng. `Publisher` và `Admin` có quyền xuất bản. Xem log ứng dụng bằng `docker compose --env-file .env.docker logs -f app`.
+
+Volume Docker `knowledge` chứa `published`, `drafts`, `staging` và `.knowledge-state`; lần đầu được khởi tạo từ dữ liệu trong image. `docker compose --env-file .env.docker down` giữ volume, còn `down -v` xóa volume và dữ liệu. Hãy sao lưu volume riêng trước khi nâng cấp hoặc xóa máy. URL tạm đổi khi tunnel khởi động lại; theo [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/), cách này dành cho chia sẻ thử nghiệm. Triển khai lâu dài cần tunnel có tên/domain cố định và gateway xác thực production như [hướng dẫn vận hành](docs/VAN_HANH.md).
 
 ## Kiểm tra nhanh
 

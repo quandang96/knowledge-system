@@ -1,0 +1,16 @@
+.git
+.agents
+.cache
+.env*
+node_modules
+output
+tests
+docs
+plans
+knowledge/drafts
+knowledge/staging
+knowledge/backups
+knowledge/.knowledge-state
+knowledge/published/.vitepress/cache
+knowledge/published/.vitepress/.temp
+knowledge/published/.vitepress/dist

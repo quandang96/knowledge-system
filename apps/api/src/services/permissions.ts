@@ -15,6 +15,7 @@ export interface AuthOptions {
   production?: boolean
   allowedOrigin?: string
   secureCookie?: boolean
+  tunnelHttpsOrigin?: boolean
 }
 export function requireRole(req: FastifyRequest, roles: AccessRole[]) {
   if (!req.identity) throw new AppError(401, 'Vui lòng đăng nhập.')
@@ -35,6 +36,8 @@ export async function registerAuth(app: FastifyInstance, options: AuthOptions) {
   if (options.mode === 'proxy' && (options.proxySecret?.length || 0) < 32)
     throw new Error('PROXY_SHARED_SECRET must contain at least 32 characters.')
   const sessions = new Map<string, { session: Session; expires: number }>()
+  const expectedOrigin = (req: FastifyRequest) =>
+    options.allowedOrigin || `${options.tunnelHttpsOrigin ? 'https' : req.protocol}://${req.headers.host}`
   const salt = randomBytes(32)
   const accounts = new Map(
     Object.entries(options.passwords || {}).map(([name, value]) => [
@@ -67,7 +70,7 @@ export async function registerAuth(app: FastifyInstance, options: AuthOptions) {
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && !req.url.startsWith('/api/auth/login')) {
       if (!req.identity) throw new AppError(401, 'Vui lòng đăng nhập.')
       const origin = req.headers.origin
-      const expected = options.allowedOrigin || `${req.protocol}://${req.headers.host}`
+      const expected = expectedOrigin(req)
       if (origin && origin !== expected) throw new AppError(403, 'Origin không được phép.')
       if (!equal(String(req.headers['x-csrf-token'] || ''), req.identity.csrf))
         throw new AppError(403, 'CSRF token không hợp lệ.')
@@ -80,8 +83,7 @@ export async function registerAuth(app: FastifyInstance, options: AuthOptions) {
     async (req, reply) => {
       if (options.mode !== 'local') throw new AppError(400, 'Đăng nhập qua gateway của tổ chức.')
       const origin = req.headers.origin
-      if (origin && origin !== (options.allowedOrigin || `${req.protocol}://${req.headers.host}`))
-        throw new AppError(403, 'Origin không được phép.')
+      if (origin && origin !== expectedOrigin(req)) throw new AppError(403, 'Origin không được phép.')
       const account = accounts.get(req.body?.username || '')
       const password = req.body?.password || ''
       if (password.length > 200) throw new AppError(401, 'Tên đăng nhập hoặc mật khẩu không đúng.')

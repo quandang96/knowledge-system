@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      AUTH_MODE: local
+      API_HOST: 127.0.0.1
+      API_PORT: 3001
+      KNOWLEDGE_ROOT: /app/knowledge
+      TUNNEL_HTTPS_ORIGIN: "true"
+      COOKIE_SECURE: "true"
+      LOCAL_ADMIN_PASSWORD: ${LOCAL_ADMIN_PASSWORD:?Set a unique admin password in .env.docker}
+      LOCAL_EDITOR_PASSWORD: ${LOCAL_EDITOR_PASSWORD:?Set a unique editor password in .env.docker}
+      LOCAL_PUBLISHER_PASSWORD: ${LOCAL_PUBLISHER_PASSWORD:?Set a unique publisher password in .env.docker}
+      LOCAL_READER_PASSWORD: ${LOCAL_READER_PASSWORD:?Set a unique reader password in .env.docker}
+    volumes:
+      - knowledge:/app/knowledge
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    network_mode: "service:app"
+    depends_on:
+      app:
+        condition: service_healthy
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --url
+      - http://127.0.0.1:3001
+      - --allowed-mail
+      - ${CLOUDFLARE_ALLOWED_EMAILS:?Set allowed email addresses in .env.docker}
+
+volumes:
+  knowledge:
