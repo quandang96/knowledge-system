@@ -42,16 +42,33 @@ Mở **http://127.0.0.1:3001**. Trang `/login` không chứa nội dung business
 
 ## Chia sẻ tạm thời qua Docker và Cloudflare
 
-Cần Docker Desktop đang chạy. Copy `docker.env.example` thành `.env.docker`, rồi điền email được phép truy cập và bốn mật khẩu riêng, đủ mạnh. `CLOUDFLARE_ALLOWED_EMAILS` nhận một email hoặc nhiều email ngăn cách bằng dấu phẩy. Không dùng lại mật khẩu demo trong `.env.example`.
+Cần Docker Desktop đang chạy. Copy `docker.env.example` thành `.env.docker`, rồi điền bốn mật khẩu riêng. Không dùng lại mật khẩu demo trong `.env.example`.
+
+Tạo file cấu hình bằng lệnh phù hợp với terminal của bạn:
+
+```sh
+# Bash / macOS / Linux / Git Bash
+cp docker.env.example .env.docker
+```
+
+```bat
+:: Windows CMD
+copy docker.env.example .env.docker
+```
 
 ```powershell
+# PowerShell
 Copy-Item docker.env.example .env.docker
-# Sửa .env.docker trước khi chạy
+```
+
+Sau đó sửa `.env.docker` và chạy:
+
+```sh
 docker compose --env-file .env.docker up -d --build
 docker compose --env-file .env.docker logs -f cloudflared
 ```
 
-Lấy URL `https://...trycloudflare.com` trong log và gửi cho các email đã khai báo. Người nhận xác thực email bằng mã một lần của Cloudflare, sau đó đăng nhập app bằng tài khoản `admin`, `editor`, `publisher` hoặc `reader` và mật khẩu tương ứng. `Publisher` và `Admin` có quyền xuất bản. Xem log ứng dụng bằng `docker compose --env-file .env.docker logs -f app`.
+Lấy URL `https://...trycloudflare.com` trong log để chia sẻ. Cloudflare không yêu cầu xác thực email; ai có URL đều mở được trang đăng nhập. Người nhận đăng nhập app bằng tài khoản `admin`, `editor`, `publisher` hoặc `reader` và mật khẩu tương ứng. `Publisher` và `Admin` có quyền xuất bản. Hãy đặt mật khẩu đủ mạnh trước khi chia sẻ link. Xem log ứng dụng bằng `docker compose --env-file .env.docker logs -f app`.
 
 Volume Docker `knowledge` chứa `published`, `drafts`, `staging` và `.knowledge-state`; lần đầu được khởi tạo từ dữ liệu trong image. `docker compose --env-file .env.docker down` giữ volume, còn `down -v` xóa volume và dữ liệu. Hãy sao lưu volume riêng trước khi nâng cấp hoặc xóa máy. URL tạm đổi khi tunnel khởi động lại; theo [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/), cách này dành cho chia sẻ thử nghiệm. Triển khai lâu dài cần tunnel có tên/domain cố định và gateway xác thực production như [hướng dẫn vận hành](docs/VAN_HANH.md).
 

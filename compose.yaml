@@ -34,8 +34,6 @@ services:
       - --no-autoupdate
       - --url
       - http://127.0.0.1:3001
-      - --allowed-mail
-      - ${CLOUDFLARE_ALLOWED_EMAILS:?Set allowed email addresses in .env.docker}
 
 volumes:
   knowledge:
