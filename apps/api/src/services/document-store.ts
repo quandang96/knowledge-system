@@ -16,7 +16,7 @@ import {
 import { documentRelations } from '../../../../packages/schemas/src/relations'
 import { CURRENT_SCHEMA_VERSION } from '../../../../packages/schemas/src/migrations'
 import { AppError, atomicWrite, checksum, exists, safePath, SerialQueue, walk } from './filesystem'
-import { parseMarkdown, serialize, validateBody } from './markdown'
+import { parseMarkdown, serialize, normalizeBody } from './markdown'
 import { validateGraph } from './graph-validation'
 import { WorkspaceStore } from './workspace'
 import { documentChecklist } from './review'
@@ -327,7 +327,7 @@ export class DocumentStore {
       this.assertActive(meta)
       // Canonical writes use relations only. related_ids is a read adapter for old files.
       meta = { ...meta, relations: documentRelations(meta), related_ids: [], schema_version: CURRENT_SCHEMA_VERSION }
-      validateBody(body)
+      body = normalizeBody(body)
       meta = await assignFunctionCode(this.functionCodeContext, meta, codeRequest)
       const file = await safePath(this.root, 'drafts', meta.doc_id, 'index.md')
       const raw = serialize(meta, body)

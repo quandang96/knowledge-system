@@ -5,7 +5,8 @@ import {
   allowedClass,
   allowedStyle,
   attributeAllowed,
-  authorTags,
+  blockedTags,
+  opaqueTags,
   renderAttributes
 } from '../../schemas/src/html-policy'
 
@@ -14,7 +15,7 @@ export const createAtlasMarkdown = () => useAtlasBlocks(new MarkdownIt({ html: t
 
 const allowedAttributes = [...new Set(Object.values(renderAttributes).flat())]
 let hooked = false
-// Second line of defence after the API allowlist: drops anything outside renderPolicy.
+// Second line of defence after the API: drops forbidden tags and attributes outside renderAttributes.
 export function sanitizeHtml(html: string) {
   if (typeof window === 'undefined' || !html) return ''
   if (!hooked) {
@@ -26,9 +27,14 @@ export function sanitizeHtml(html: string) {
       else if (data.attrName === 'style') data.attrValue = allowedStyle(data.attrValue).style
       if (data.keepAttr && !data.attrValue && !['alt', 'open'].includes(data.attrName)) data.keepAttr = false
     })
+    // A page opened from a document must not reach back into Atlas through window.opener.
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      if (node.nodeName === 'A' && node.getAttribute('target')) node.setAttribute('rel', 'noopener noreferrer')
+    })
   }
   return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [...authorTags],
+    // DOMPurify's default tag list, minus everything the API refuses.
+    FORBID_TAGS: [...opaqueTags, ...blockedTags],
     ALLOWED_ATTR: allowedAttributes,
     ALLOW_DATA_ATTR: false,
     ALLOWED_URI_REGEXP: /^(?:https?:|[^a-z]|[a-z0-9+.-]+(?:[^a-z0-9+.\-:]|$))/i

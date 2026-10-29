@@ -19,9 +19,11 @@ export function parseMarkdown(raw: string, options: { sanitize?: boolean } = {})
         }
       }
     })
-    const { body, removed } = options.sanitize ? sanitizeBody(parsed.content) : { body: parsed.content, removed: [] }
+    const { body, removed, converted } = options.sanitize
+      ? sanitizeBody(parsed.content)
+      : { body: parsed.content, removed: [], converted: [] }
     validateBody(body)
-    return { metadata: parsed.data, body: body.trim() + '\n', removed }
+    return { metadata: parsed.data, body: body.trim() + '\n', removed, converted }
   } catch (error) {
     if (error instanceof AppError) throw error
     throw new AppError(400, 'YAML frontmatter không hợp lệ.')
@@ -35,10 +37,16 @@ export function validateBody(body: string) {
   // HTML is limited to the shared allowlist. VitePress never compiles document bodies
   // (see the .vitepress config), so `{{ }}` in text and code samples stays plain text.
   const removed = [...new Set(htmlFragments(body).flatMap((fragment) => scanHtml(fragment.content, safeLink).removed))]
-  if (removed.length) throw new AppError(400, `HTML không được hỗ trợ: ${removed.join(', ')}.`)
+  if (removed.length)
+    throw new AppError(400, `HTML có thể chạy mã hoặc giả giao diện nên bị chặn: ${removed.join(', ')}.`)
   if (/\]\(\s*(?:javascript|data|vbscript|file):/i.test(body) || /\]\(\s*(?:\/\/|[A-Z]:\\)/i.test(body))
     throw new AppError(400, 'URL trong Markdown không an toàn.')
   for (const link of markdownLinks(body)) validateLink(link)
+}
+// Validates a body about to be written and rewrites legacy HTML (`<font>`, `<center>`, `align`).
+export function normalizeBody(body: string) {
+  validateBody(body)
+  return sanitizeBody(body).body
 }
 export function markdownLinks(body: string): string[] {
   const links: string[] = []
@@ -81,15 +89,31 @@ const safeLink = (link: string) => {
 interface HtmlFragment {
   content: string
   lines: [number, number]
+  block: boolean
 }
 function htmlFragments(body: string): HtmlFragment[] {
   const fragments: HtmlFragment[] = []
+  // Table cell inline tokens carry no map, so they inherit their row's lines.
+  let lines: [number, number] = [0, 0]
   for (const token of parser.parse(body, {})) {
-    if (token.type === 'html_block') fragments.push({ content: token.content, lines: token.map! })
+    if (token.map) lines = token.map
+    if (token.type === 'html_block') fragments.push({ content: token.content, lines, block: true })
     for (const child of token.children || [])
-      if (child.type === 'html_inline') fragments.push({ content: child.content, lines: token.map! })
+      if (child.type === 'html_inline') fragments.push({ content: child.content, lines, block: false })
   }
   return fragments
+}
+// Inside a blockquote or list item, markdown-it strips each line's `> ` or indent from
+// html_block content, so the cleaned block is re-prefixed line by line from the source.
+function prefixedBlock(source: string[], content: string, html: string) {
+  const original = content.replace(/\n$/, '').split('\n')
+  if (original.length !== source.length || source.some((line, i) => !line.endsWith(original[i]))) return null
+  const prefixes = source.map((line, i) => line.slice(0, line.length - original[i].length))
+  return html
+    .replace(/\n$/, '')
+    .split('\n')
+    .map((line, i) => prefixes[Math.min(i, prefixes.length - 1)] + line)
+    .join('\n')
 }
 // Import keeps what the allowlist accepts and reports the rest instead of refusing the file.
 // Each cleaned fragment replaces its first match after the previous one within its block's lines.
@@ -98,20 +122,29 @@ export function sanitizeBody(body: string) {
   for (let i = 0; i < body.length; i++) if (body[i] === '\n') lineStarts.push(i + 1)
   const edits: { start: number; end: number; html: string }[] = []
   const removed = new Set<string>()
+  const converted = new Set<string>()
   let cursor = 0
   for (const fragment of htmlFragments(body)) {
     const scan = scanHtml(fragment.content, safeLink)
     const blockStart = lineStarts[fragment.lines[0]]
     const blockEnd = lineStarts[fragment.lines[1]] ?? body.length
-    const start = body.indexOf(fragment.content, Math.max(cursor, blockStart))
-    if (start < 0 || start + fragment.content.length > blockEnd) continue
-    cursor = start + fragment.content.length
-    if (!scan.removed.length) continue
+    let start = body.indexOf(fragment.content, Math.max(cursor, blockStart))
+    let html: string | null = scan.html
+    if (start >= 0 && start + fragment.content.length <= blockEnd) cursor = start + fragment.content.length
+    else if (fragment.block && blockStart >= cursor) {
+      const end = fragment.lines[1] < lineStarts.length ? blockEnd - 1 : body.length
+      html = prefixedBlock(body.slice(blockStart, end).split('\n'), fragment.content, scan.html)
+      if (html === null) continue
+      start = blockStart
+      cursor = end
+    } else continue
+    if (!scan.removed.length && !scan.converted.length) continue
     scan.removed.forEach((item) => removed.add(item))
-    edits.push({ start, end: cursor, html: scan.html })
+    scan.converted.forEach((item) => converted.add(item))
+    edits.push({ start, end: cursor, html })
   }
   for (const edit of edits.reverse()) body = body.slice(0, edit.start) + edit.html + body.slice(edit.end)
-  return { body, removed: [...removed] }
+  return { body, removed: [...removed], converted: [...converted] }
 }
 export function inspectImport(raw: string) {
   const parsed = parseMarkdown(raw, { sanitize: true })
@@ -122,10 +155,14 @@ export function inspectImport(raw: string) {
       (key) => !metadata[key as keyof Metadata]
     ),
     warnings: [
-      ...(parsed.removed.length ? [`Đã loại bỏ HTML không hỗ trợ: ${parsed.removed.join(', ')}`] : []),
+      ...(parsed.removed.length ? [`Đã loại bỏ HTML có thể chạy mã: ${parsed.removed.join(', ')}`] : []),
       ...markdownLinks(parsed.body)
         .filter((v) => v.startsWith('./'))
         .map((v) => `Cần tải attachment trước khi Publish: ${v}`)
-    ]
+    ],
+    // Informational only: formatting adapted to Atlas, nothing the author must act on.
+    notes: parsed.converted.length
+      ? [`Đã chuyển định dạng sang kiểu Atlas, bỏ phần không dùng được: ${parsed.converted.join(', ')}`]
+      : []
   }
 }

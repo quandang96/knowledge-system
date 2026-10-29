@@ -4,8 +4,11 @@ import {
   allowedStyle,
   attributeAllowed,
   authorAttributes,
-  authorTags,
+  blockedTags,
+  legacyClasses,
+  legacyTags,
   opaqueTags,
+  textAlignTags,
   voidTags
 } from '../../../../packages/schemas/src/html-policy'
 
@@ -17,25 +20,44 @@ const attributeValue: Record<string, RegExp> = {
   height: /^\d{1,4}%?$/,
   colspan: /^\d{1,3}$/,
   rowspan: /^\d{1,3}$/,
-  align: /^(?:left|center|right)$/i
+  align: /^(?:left|center|right)$/i,
+  target: /^_(?:blank|self)$/i
+}
+// Rewrites a legacy presentational attribute to a style declaration ('' drops it),
+// or returns undefined when the attribute is not legacy.
+function legacyAttribute(tag: string, key: string, value: string) {
+  if (tag === 'font' && key === 'color') return allowedStyle(`color: ${value}`).dropped ? '' : `color: ${value}`
+  if (tag === 'font' && (key === 'size' || key === 'face')) return ''
+  if (key === 'align' && textAlignTags.has(tag))
+    return /^(?:left|center|right|justify)$/i.test(value) ? `text-align: ${value.toLowerCase()}` : ''
 }
 
 export interface HtmlScan {
   html: string
   removed: string[]
+  converted: string[]
   links: string[]
 }
-// Re-serializes one Markdown HTML fragment against the author allowlist, reporting what it removed.
-// Callers keep the original fragment when nothing was removed, so `html` only matters on import.
+// Re-serializes one Markdown HTML fragment against the shared policy. `removed` lists attack
+// markup (saving is refused); `converted` lists what was rewritten or harmlessly dropped.
+// Callers keep the original fragment when nothing was removed or converted.
 export function scanHtml(fragment: string, safeUrl: (url: string) => boolean): HtmlScan {
   const removed = new Set<string>()
+  const converted = new Set<string>()
   const links: string[] = []
-  const emitted: boolean[] = []
+  const emitted: (string | null)[] = []
   let html = ''
   let skip = 0
+  // Inline HTML arrives one tag per fragment, so a legacy closing tag comes alone.
+  const closing = /^<\/\s*([a-z][a-z0-9-]*)\s*>$/i.exec(fragment.trim())
+  const legacyClose = closing && legacyTags[closing[1].toLowerCase()]
+  if (legacyClose)
+    return { html: `</${legacyClose}>`, removed: [], converted: [`<${closing[1].toLowerCase()}>`], links }
   // htmlparser2 silently ignores stray closing tags, so `</script>` alone needs its own check.
-  for (const match of fragment.matchAll(/<\/\s*([a-z][a-z0-9-]*)/gi))
-    if (!authorTags.has(match[1].toLowerCase())) removed.add(`<${match[1].toLowerCase()}>`)
+  for (const match of fragment.matchAll(/<\/\s*([a-z][a-z0-9-]*)/gi)) {
+    const name = match[1].toLowerCase()
+    if (opaqueTags.has(name) || blockedTags.has(name)) removed.add(`<${name}>`)
+  }
   const parser = new Parser(
     {
       onopentag(name, attributes) {
@@ -44,28 +66,59 @@ export function scanHtml(fragment: string, safeUrl: (url: string) => boolean): H
           skip++
           return
         }
-        const keep = authorTags.has(name)
-        emitted.push(keep)
+        const output = legacyTags[name] || name
+        const blocked = blockedTags.has(output)
+        const keep = !blocked && /^[a-z][a-z0-9-]*$/.test(output)
+        emitted.push(keep ? output : null)
         if (!keep) {
-          removed.add(`<${name}>`)
+          ;(blocked ? removed : converted).add(`<${shorten(name)}>`)
           return
         }
-        let tag = `<${name}`
+        if (output !== name) converted.add(`<${name}>`)
+        const styles = name === 'center' ? ['text-align: center'] : []
+        let tag = `<${output}`
         for (const [key, value] of Object.entries(attributes)) {
-          const original = key === 'class' ? value.trim().split(/\s+/).join(' ') : value
-          let kept: string | null = original
-          if (!attributeAllowed(authorAttributes, name, key)) kept = null
-          else if (key === 'class') kept = allowedClass(value) || null
-          else if (key === 'style') kept = allowedStyle(value).dropped ? null : value
-          else if (key === 'href' || key === 'src') kept = safeUrl(value) ? value : null
-          else if (attributeValue[key] && !attributeValue[key].test(value)) kept = null
-          if (kept !== original) {
-            removed.add(['href', 'src', 'style', 'class'].includes(key) ? `${key}="${shorten(value)}"` : key)
-            // A partly allowed class list keeps its allowed names.
-            if (kept === null) continue
+          const legacy = legacyAttribute(name, key, value)
+          if (legacy !== undefined) {
+            if (name !== 'font') converted.add(key)
+            if (legacy) styles.push(legacy)
+            continue
+          }
+          // rel is always set below so an author cannot weaken it.
+          if (output === 'a' && key === 'rel') continue
+          // Class names and data-* only carry styling or scripting hooks, so dropping them is safe.
+          if (key === 'class') {
+            const names = value.trim().split(/\s+/)
+            const kept = allowedClass(names.map((name) => legacyClasses[name] || name).join(' '))
+            if (kept !== names.join(' ')) converted.add(`class="${shorten(value)}"`)
+            if (kept) tag += ` class="${kept}"`
+            continue
+          }
+          if (key.startsWith('data-')) {
+            converted.add(key)
+            continue
+          }
+          // Event handlers and script URLs are attacks; anything else unsupported is dropped.
+          if (key.startsWith('on') || ((key === 'href' || key === 'src') && !safeUrl(value))) {
+            removed.add(key.startsWith('on') ? key : `${key}="${shorten(value)}"`)
+            continue
+          }
+          if (!attributeAllowed(authorAttributes, output, key) || attributeValue[key]?.test(value) === false) {
+            converted.add(key === 'style' ? `style="${shorten(value)}"` : key)
+            continue
           }
           if (key === 'href' || key === 'src') links.push(value)
-          tag += key === 'open' ? ' open' : ` ${key}="${escapeAttribute(kept)}"`
+          if (key === 'style') {
+            const style = allowedStyle(value)
+            if (style.dropped) converted.add(`style="${shorten(value)}"`)
+            if (style.style) styles.unshift(style.dropped ? style.style : value)
+          } else tag += key === 'open' ? ' open' : ` ${key}="${escapeAttribute(value)}"`
+        }
+        if (styles.length) tag += ` style="${escapeAttribute(styles.join('; '))}"`
+        if (output === 'a') {
+          const rel = /^_blank$/i.test(attributes.target || '') ? 'noopener noreferrer' : undefined
+          if (attributes.rel !== rel) converted.add('rel')
+          if (rel) tag += ` rel="${rel}"`
         }
         html += `${tag}>`
       },
@@ -74,7 +127,8 @@ export function scanHtml(fragment: string, safeUrl: (url: string) => boolean): H
           skip--
           return
         }
-        if (emitted.pop() && !implied && !voidTags.has(name)) html += `</${name}>`
+        const output = emitted.pop()
+        if (output && !implied && !voidTags.has(output)) html += `</${output}>`
       },
       ontext(text) {
         if (!skip) html += escapeText(text)
@@ -90,5 +144,5 @@ export function scanHtml(fragment: string, safeUrl: (url: string) => boolean): H
   )
   parser.write(fragment)
   parser.end()
-  return { html, removed: [...removed], links }
+  return { html, removed: [...removed], converted: [...converted], links }
 }

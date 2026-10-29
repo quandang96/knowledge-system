@@ -24,6 +24,14 @@
 .editor-toolbar .v-btn, .viewer-toolbar .v-btn { min-width: 44px !important; min-height: 44px; }
 .editor-image-node { margin: 24px 0; border: 1px solid var(--border); border-radius: 8px; padding: 12px; white-space: normal; }
 .editor-image-node.image-selected { outline: 2px solid var(--primary); outline-offset: 2px; }
+.editor-raw-node { margin: 20px 0; border: 1px dashed var(--border); border-radius: 8px; padding: 8px 12px 12px; white-space: normal; }
+.editor-raw-node.raw-selected { outline: 2px solid var(--primary); outline-offset: 2px; }
+.raw-node-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.raw-node-preview > :first-child { margin-top: 0; }
+.raw-node-preview > :last-child { margin-bottom: 0; }
+.raw-node-source textarea { font-family: ui-monospace, monospace; font-size: 13px; }
+.atlas-raw-inline { font-family: ui-monospace, monospace; font-size: 0.8em; padding: 0 4px; border-radius: 4px; color: var(--text-secondary); background: var(--surface-muted); white-space: nowrap; }
+.atlas-raw-inline.ProseMirror-selectednode { outline: 2px solid var(--primary); }
 .image-node-actions, .viewer-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 8px 12px; }
 .image-node-actions { padding: 0 0 8px; }
 .image-library { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 16px; margin-top: 20px; }

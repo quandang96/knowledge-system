@@ -9,7 +9,7 @@ import {
   type WorkspaceResponse
 } from '../../../../packages/schemas/src/index'
 import { AppError, SerialQueue, atomicWrite, checksum, exists, safePath } from './filesystem'
-import { validateBody } from './markdown'
+import { normalizeBody } from './markdown'
 
 export class WorkspaceStore {
   private queue = new SerialQueue()
@@ -69,7 +69,7 @@ export class WorkspaceStore {
         throw new AppError(400, 'Template ID bị trùng.')
       for (const item of config.templates) {
         templateSchema.parse(item)
-        validateBody(item.body)
+        item.body = normalizeBody(item.body)
         if (item.project_id && !config.projects.some((p) => p.id === item.project_id))
           throw new AppError(400, 'Project của template chưa tồn tại.')
         const previous = current.templates.find((t) => t.id === item.id)

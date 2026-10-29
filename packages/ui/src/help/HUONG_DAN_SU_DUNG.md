@@ -210,7 +210,7 @@ Nút **Import Markdown** ở đầu trang nhập nội dung từ file `.md`. Nú
 
 ### Panel, thu gọn, cột, trạng thái và HTML
 
-Gõ trong **Markdown Source**, rồi mở **Xem trước** để kiểm tra. Tài liệu có các block này tạm thời chỉ sửa được ở Markdown Source.
+Gõ trong **Markdown Source**, rồi mở **Xem trước** để kiểm tra. Ở tab **Soạn thảo**, mỗi block và khối HTML hiện thành một ô xem trước có nhãn *giữ nguyên khi lưu*: bấm **Sửa mã** để sửa mã của riêng khối đó, hoặc biểu tượng thùng rác để xóa. Thẻ HTML nằm giữa dòng (như `<span>`, `:status[…]`) hiện thành nhãn nhỏ màu xám; chữ xung quanh vẫn sửa bình thường.
 
 ```markdown
 ::: info Tiêu đề tùy chọn
@@ -235,7 +235,10 @@ Trạng thái: :status[Đã duyệt]{green}
 
 - Màu trạng thái: `grey`, `blue`, `green`, `yellow`, `red`, `purple`.
 - Khi đặt block này trong block khác, block ngoài cần nhiều dấu `:` hơn block trong (ví dụ `::::` bọc `:::`).
-- HTML cơ bản được hỗ trợ: `<br>`, `<u>`, `<mark>`, `<sub>`, `<sup>`, `<kbd>`, `<details>`, `<span style="color: …">` và bảng có `colspan`/`rowspan`. Script, sự kiện `on…`, iframe, `javascript:` bị từ chối khi lưu. Khi import, phần này được tự loại bỏ và hiện trong cảnh báo.
+- Dùng được mọi thẻ HTML, trừ thẻ có thể chạy mã hoặc giả giao diện: `<script>`, `<style>`, `<iframe>`, `<object>`, `<embed>`, `<svg>`, `<math>`, `<meta>`, `<link>`, `<base>`, `<form>`, `<input>`, `<button>`, `<dialog>`. Sự kiện `on…` (như `onclick`) và link `javascript:` / `data:` cũng bị chặn. Khi lưu, những thứ này làm lỗi; khi import, chúng được tự loại bỏ và hiện trong cảnh báo.
+- Thuộc tính khác được tự bỏ, không làm lỗi. Giữ lại: `class` dạng `atlas-…`, `title`, `lang`, `dir`, `href`/`target` trên link, `src`/`alt`/`width`/`height` trên ảnh, `open` trên `<details>`, `colspan`/`rowspan`/`align` trên ô bảng.
+- `style` giữ: `color`, `background-color`, `text-align`, `font-weight`, `font-style`, `text-decoration`, `vertical-align` và `font-size` từ 10px đến 72px. CSS khác (như `position`, `display`) được tự bỏ.
+- HTML kiểu cũ được tự đổi: `<font color>` thành `<span style="color">`, `<center>` và `align="…"` thành `text-align`. Class `doc-callout--info/warning/success/danger` thành panel Atlas, `doc-details` thành khối thu gọn.
 
 ## 12. Chèn ảnh
 

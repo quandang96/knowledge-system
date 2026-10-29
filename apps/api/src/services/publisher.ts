@@ -66,7 +66,7 @@ export async function validatePublished(source: string, changedIds: string[] = [
       const target = docs.find((d) => d.metadata.doc_id === relation.target_id)!
       if (target.metadata.type === 'test-scenario' && !changedIds.includes(doc.metadata.doc_id)) continue
       const error = relationError(doc.metadata, target.metadata, relation.kind)
-      if (error) throw new AppError(400, `${doc.metadata.doc_id}: ${error}`)
+      if (error) throw new AppError(400, `${doc.metadata.doc_id} → liên kết ${target.metadata.doc_id}: ${error}`)
     }
     const links = [
       ...markdownLinks(doc.body),
@@ -84,7 +84,7 @@ export async function validatePublished(source: string, changedIds: string[] = [
             `Liên kết tài liệu chưa xuất bản: ${stableId}. Xuất bản cùng changeset nếu đây là tài liệu mới.`
           )
         const error = relationError(doc.metadata, target.metadata, 'related')
-        if (error) throw new AppError(400, `${doc.metadata.doc_id}: ${error}`)
+        if (error) throw new AppError(400, `${doc.metadata.doc_id} → liên kết ${target.metadata.doc_id}: ${error}`)
         continue
       }
       if (changedIds.includes(doc.metadata.doc_id) && link.startsWith('/test-scenarios/'))

@@ -13,6 +13,7 @@ import type { UploadedImage } from './media'
 import DocumentReferencePicker from './DocumentReferencePicker.vue'
 import EditorImage from './EditorImage.vue'
 import EditorCodeBlock from './EditorCodeBlock.vue'
+import EditorRawBlock from './EditorRawBlock.vue'
 import { confirmDialog } from './dialog'
 import { findMention, mentionTrigger, useMention } from './mention'
 import MentionMenu from './MentionMenu.vue'
@@ -40,6 +41,7 @@ const draftImage = MarkdownImage.extend({
   addNodeView() { return VueNodeViewRenderer(EditorImage) }
 })
 const richExtensions = editorExtensions().filter(extension => extension.name !== 'image').map(extension => extension.name === 'starterKit' ? (extension as Extension).extend({ addExtensions() { return (this.parent?.() || []).map(child => child.name === 'codeBlock' ? (child as TiptapNode).extend({ addNodeView() { return VueNodeViewRenderer(EditorCodeBlock) } }) : child) } }) : extension)
+  .map(extension => extension.name === 'atlasRawBlock' ? (extension as TiptapNode).extend({ addNodeView() { return VueNodeViewRenderer(EditorRawBlock) } }) : extension)
 const editor = useEditor({ extensions: [...richExtensions, draftImage, Markdown, placeholder], content: props.modelValue, contentType: 'markdown',
   editorProps: {
     attributes: { 'aria-label': 'Nội dung tài liệu', role: 'textbox', 'aria-multiline': 'true' },

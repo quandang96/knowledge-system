@@ -5,8 +5,14 @@
 - Markdown hỗ trợ panel `::: info | note | tip | warning | danger`, khối thu gọn `::: expand`, bố cục `:::: columns` / `::: column` và nhãn trạng thái `:status[Text]{green}`. Các block hiển thị ở trang tài liệu, Xem trước trong Studio và Function ID.
 - HTML cơ bản được chấp nhận theo một allowlist dùng chung (`packages/schemas/src/html-policy.ts`). Khi lưu, HTML ngoài allowlist bị từ chối và thông báo nêu rõ thẻ/thuộc tính vi phạm. Khi import, phần đó được loại bỏ và liệt kê trong cảnh báo.
 - Trình duyệt lọc lại HTML đã render bằng DOMPurify trước khi đưa vào trang.
+- Nới allowlist: thêm `<dl>`, `<figure>`, `<caption>`, `<tfoot>`, `<q>`, `<cite>`, link `target="_blank"` (luôn kèm `rel="noopener noreferrer"`) và các CSS `font-weight`, `font-style`, `text-decoration`, `vertical-align`, `font-size` (10–72px). `<font>`, `<center>` và `align` được tự đổi sang dạng tương đương thay vì bị từ chối.
+- Class `doc-callout--*` và `doc-details` của tài liệu nguồn được đổi sang panel và khối thu gọn của Atlas.
+- Đổi sang danh sách chặn: mọi thẻ HTML được dùng, trừ thẻ chạy mã hoặc giả giao diện (`script`, `style`, `iframe`, `object`, `embed`, `svg`, `math`, `meta`, `link`, `base`, `form`, `input`, `button`, `dialog`…). Khi lưu, chỉ những thẻ này, sự kiện `on…` và link `javascript:`/`data:` làm lỗi; thuộc tính, class và CSS không hỗ trợ được tự bỏ.
+- Hộp thoại Import: chỉ báo các ô metadata còn trống (theo tên ô, cập nhật khi gõ) và khóa **Xem trước** đến khi điền đủ; thông báo chuyển định dạng hiện là ghi chú, không còn trông như lỗi.
+- Lỗi xuất bản do liên kết không hợp lệ giờ nêu rõ liên kết nào, ví dụ `BF-APP-001 → liên kết TC-APP-001: …`.
+- Sửa import: HTML trong ô bảng không còn báo nhầm "YAML frontmatter không hợp lệ"; HTML trong blockquote hoặc danh sách được lọc thay vì làm import bị từ chối.
 - VitePress không còn biên dịch body tài liệu (body vẫn được tải qua API như trước). Nhờ vậy `{{ }}` trong văn bản và code mẫu không còn bị chặn.
-- Tài liệu có các block mới tạm thời chỉ sửa được trong Markdown Source; soạn trực quan sẽ có ở bước sau.
+- Tab Soạn thảo không còn bị khóa với tài liệu có HTML hoặc block `:::`: mỗi khối hiện thành ô xem trước, giữ nguyên văn khi lưu, sửa qua nút **Sửa mã**; thẻ HTML giữa dòng và `:status[…]` hiện thành nhãn nhỏ. Phần Markdown còn lại vẫn soạn trực quan.
 
 ## 2026-10-23 — Hướng dẫn sử dụng từng bước, có ảnh minh họa
 
