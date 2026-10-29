@@ -3,6 +3,7 @@ import { MarkdownManager } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { TableKit } from '@tiptap/extension-table'
+import { useAtlasBlocks } from '../../schemas/src/markdown-blocks'
 export const MarkdownImage = Image.extend({
   renderMarkdown(node) {
     const alt = String(node.attrs?.alt || '')
@@ -21,7 +22,8 @@ export const editorExtensions = () => [
   MarkdownImage.configure({ inline: false, allowBase64: false }),
   TableKit.configure({ table: { renderWrapper: true } })
 ]
-const parser = new MarkdownIt({ html: false })
+// Same block and HTML support as the renderers, so the editor never silently drops them.
+const parser = useAtlasBlocks(new MarkdownIt({ html: true }))
 export function semanticSignature(source: string): string {
   const tokens = parser.parse(source, {})
   // Ignore formatting whitespace and list indentation; preserve links, tables, images and code language/content.

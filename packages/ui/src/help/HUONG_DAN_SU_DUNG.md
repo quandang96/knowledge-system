@@ -208,6 +208,35 @@ Nút **Tạo chức năng** mở ngay hộp tạo tài liệu với loại Chứ
 
 Nút **Import Markdown** ở đầu trang nhập nội dung từ file `.md`. Nút **Hiện bản nháp** mở danh sách bản nháp của nhóm để chuyển nhanh giữa các tài liệu.
 
+### Panel, thu gọn, cột, trạng thái và HTML
+
+Gõ trong **Markdown Source**, rồi mở **Xem trước** để kiểm tra. Tài liệu có các block này tạm thời chỉ sửa được ở Markdown Source.
+
+```markdown
+::: info Tiêu đề tùy chọn
+Nội dung panel. Có thể dùng note, tip, warning, danger thay cho info.
+:::
+
+::: expand Xem chi tiết
+Nội dung bị thu gọn, bấm tiêu đề để mở.
+:::
+
+:::: columns
+::: column
+Cột trái
+:::
+::: column
+Cột phải
+:::
+::::
+
+Trạng thái: :status[Đã duyệt]{green}
+```
+
+- Màu trạng thái: `grey`, `blue`, `green`, `yellow`, `red`, `purple`.
+- Khi đặt block này trong block khác, block ngoài cần nhiều dấu `:` hơn block trong (ví dụ `::::` bọc `:::`).
+- HTML cơ bản được hỗ trợ: `<br>`, `<u>`, `<mark>`, `<sub>`, `<sup>`, `<kbd>`, `<details>`, `<span style="color: …">` và bảng có `colspan`/`rowspan`. Script, sự kiện `on…`, iframe, `javascript:` bị từ chối khi lưu. Khi import, phần này được tự loại bỏ và hiện trong cảnh báo.
+
 ## 12. Chèn ảnh
 
 **Công dụng:** thêm ảnh chụp màn hình hoặc hình minh họa ngay trong nội dung.

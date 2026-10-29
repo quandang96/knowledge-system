@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { createVNode, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, render, watch } from 'vue'
+import { computed, createVNode, getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, render, watch } from 'vue'
+import { sanitizeHtml } from './atlas-markdown'
 import MediaImage from './MediaImage.vue'
 import MermaidPreview from './MermaidPreview.vue'
 const props = defineProps<{ html: string; imageLayout?: Record<string,{align:'left'|'center'|'right';width:number}> }>()
-const host = ref<HTMLElement>(); const context = getCurrentInstance()!.appContext
+const host = ref<HTMLElement>(); const safeHtml = computed(() => sanitizeHtml(props.html)); const context = getCurrentInstance()!.appContext
 let mounts: HTMLElement[] = []; let generation = 0
 function clear() { for (const target of mounts) render(null, target); mounts = [] }
 async function enhance() {
   const current = ++generation; clear(); await nextTick()
   if (current !== generation || !host.value) return
-  // Rebuild only from the same HTML-disabled Markdown renderer, including layout-only updates.
-  host.value.innerHTML = props.html
+  // Rebuild from the sanitized render, including layout-only updates.
+  host.value.innerHTML = safeHtml.value
   for (const image of host.value.querySelectorAll('img')) {
     const target = document.createElement('div'); target.className = 'atlas-wide-block'
     const layout = props.imageLayout?.[image.getAttribute('data-asset-path') || '']
@@ -29,7 +30,7 @@ async function enhance() {
 watch(() => [props.html,props.imageLayout], enhance, { flush: 'pre', deep:true }); onMounted(enhance)
 onBeforeUnmount(() => { ++generation; clear() })
 </script>
-<template><!-- HTML originates only from markdown-it with HTML disabled. -->
+<template><!-- HTML comes from createAtlasMarkdown and always passes sanitizeHtml. -->
   <!-- eslint-disable-next-line vue/no-v-html -->
-  <div ref="host" v-html="html"></div>
+  <div ref="host" v-html="safeHtml"></div>
 </template>

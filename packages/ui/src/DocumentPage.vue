@@ -6,7 +6,7 @@ import { linkedDocumentId } from '../../schemas/src/document-links'
 import { useLocationQuery } from './location-query'
 import { businessContent, splitScreenContent } from './document-presentation'
 import { useDelayedBusy } from './async-state'
-import MarkdownIt from 'markdown-it'
+import { createAtlasMarkdown } from './atlas-markdown'
 import { type DocumentRecord, type DocumentSummary, type Connections, typeIcons, typeLabels } from '../../schemas/src/index'
 import { api, assetUrl, canEdit, dateLabel, fail, notify, state, currentProject, changeProject } from './state'
 import MermaidPreview from './MermaidPreview.vue'
@@ -31,7 +31,7 @@ const relatedGroups = computed(() => {
   }
   return [...new Set([...items.values()].map(item=>item.metadata.type))].map(type=>({type,items:[...items.values()].filter(item=>item.metadata.type===type)}))
 })
-const parser = new MarkdownIt({html:false,linkify:false})
+const parser = createAtlasMarkdown()
 const route=useRoute();const router=useRouter();const query=useLocationQuery()
 parser.renderer.rules.link_open=(tokens,index,options,_env,self)=>{const token=tokens[index];const id=linkedDocumentId(token.attrGet('href')||'');const target=connections.value.outgoing.find(edge=>edge.target_id===id)?.document;if(target)token.attrSet('href',target.url);return self.renderToken(tokens,index,options)}
 const originalFence = parser.renderer.rules.fence!

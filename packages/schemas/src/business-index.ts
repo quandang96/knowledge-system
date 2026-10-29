@@ -1,8 +1,9 @@
 import type { BusinessDocumentLink, BusinessSummary, DocumentRecord } from './index'
 import { documentRelations } from './relations'
 import MarkdownIt from 'markdown-it'
+import { useAtlasBlocks } from './markdown-blocks'
 
-const parser = new MarkdownIt({ html: false })
+const parser = useAtlasBlocks(new MarkdownIt({ html: false }))
 function sectionText(body: string, heading: RegExp) {
   const tokens = parser.parse(body, {})
   for (let i = 0; i < tokens.length - 1; i++) {

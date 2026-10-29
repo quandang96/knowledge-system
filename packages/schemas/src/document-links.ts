@@ -1,7 +1,8 @@
 import MarkdownIt from 'markdown-it'
 import { idSchema } from './index'
+import { useAtlasBlocks } from './markdown-blocks'
 
-const parser = new MarkdownIt({ html: false, linkify: false })
+const parser = useAtlasBlocks(new MarkdownIt({ html: false, linkify: false }))
 export function documentLink(id: string) {
   return `/document/?id=${encodeURIComponent(idSchema.parse(id))}`
 }

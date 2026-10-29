@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import MarkdownIt from 'markdown-it'
+import { createAtlasMarkdown } from './atlas-markdown'
 import { type CatalogResult, type DocumentRecord, type DocumentSummary, type DraftRecord } from '../../schemas/src/index'
 import { functionConventionBody } from '../../schemas/src/function-convention'
 import { api, ApiError, assetUrl, canEdit, canManage, changeProject, currentProject, fail, notify, projectDocuments, state } from './state'
@@ -30,7 +30,7 @@ const groups = computed(() => {
   }
   return [...groups.values()]
 })
-const parser = new MarkdownIt({html:false,linkify:false})
+const parser = createAtlasMarkdown()
 const originalFence=parser.renderer.rules.fence!
 parser.renderer.rules.fence=(tokens,index,options,env,self)=>tokens[index].info.trim()==='mermaid'?mermaidPlaceholder(tokens[index].content):originalFence(tokens,index,options,env,self)
 parser.renderer.rules.image = (tokens,index,options,_env,self) => { const token=tokens[index];if(convention.value)token.attrSet('src',assetUrl(convention.value,token.attrGet('src')||''));return self.renderToken(tokens,index,options) }

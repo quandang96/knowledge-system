@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-29 — HTML an toàn và block kiểu Confluence trong Markdown
+
+- Markdown hỗ trợ panel `::: info | note | tip | warning | danger`, khối thu gọn `::: expand`, bố cục `:::: columns` / `::: column` và nhãn trạng thái `:status[Text]{green}`. Các block hiển thị ở trang tài liệu, Xem trước trong Studio và Function ID.
+- HTML cơ bản được chấp nhận theo một allowlist dùng chung (`packages/schemas/src/html-policy.ts`). Khi lưu, HTML ngoài allowlist bị từ chối và thông báo nêu rõ thẻ/thuộc tính vi phạm. Khi import, phần đó được loại bỏ và liệt kê trong cảnh báo.
+- Trình duyệt lọc lại HTML đã render bằng DOMPurify trước khi đưa vào trang.
+- VitePress không còn biên dịch body tài liệu (body vẫn được tải qua API như trước). Nhờ vậy `{{ }}` trong văn bản và code mẫu không còn bị chặn.
+- Tài liệu có các block mới tạm thời chỉ sửa được trong Markdown Source; soạn trực quan sẽ có ở bước sau.
+
 ## 2026-10-23 — Hướng dẫn sử dụng từng bước, có ảnh minh họa
 
 - Viết lại trang **Hướng dẫn sử dụng** theo giao diện hiện tại: 21 mục, mỗi mục có **Công dụng**, các bước đánh số và 29 ảnh chụp thật có khung đỏ đánh dấu chỗ cần bấm. Mục lục bấm được; ảnh tải lười nhưng giữ sẵn kích thước nên nhảy mục không bị lệch; bấm ảnh để xem cỡ lớn.
